@@ -18,12 +18,12 @@ public abstract class Maybe <A> : Functor<A> {
 
 	Functor<A> Functor<A>.FMap (Func<A, A> f)
 	{
-		throw new NotImplementedException ();
+		return FMap (f);
 	}
 
 	Functor<A> Functor<A>.FMap (Action<A> f)
 	{
-		throw new NotImplementedException ();
+		return FMap (f);
 	}
 }
 

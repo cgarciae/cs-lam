@@ -1,22 +1,15 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
-using Functional;
 
 public abstract class Maybe <A> : Functor<A> {
 
 	public abstract bool IsNothing {get;}
 	public abstract A value {get;}
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
-	public abstract Maybe<A> FMap (Func<A,A> f);
 	public abstract Maybe<A> FMap (Action<A> f);
 
 	Functor<B> Functor<A>.FMap<B> (Func<A, B> f)
-	{
-		return FMap (f);
-	}
-
-	Functor<A> Functor<A>.FMap (Func<A, A> f)
 	{
 		return FMap (f);
 	}
@@ -38,12 +31,6 @@ public class Just<A> : Maybe<A> {
 	public override Maybe<B> FMap <B> (Func <A, B> f)
 	{
 		return new Just<B> (f (val));
-	}
-	
-	public override Maybe<A> FMap (Func<A, A> f)
-	{
-		val = f (val);
-		return this;
 	}
 	
 	public override Maybe<A> FMap (Action<A> f)
@@ -72,11 +59,6 @@ public class Nothing<A> : Maybe<A> {
 		return new Nothing<B> ();
 	}
 
-	public override Maybe<A> FMap (Func<A, A> f)
-	{
-		return this;
-	}
-
 	public override Maybe<A> FMap (Action<A> f)
 	{
 		return this;
@@ -97,6 +79,14 @@ public class Nothing<A> : Maybe<A> {
 
 public static class Maybe {
 
+	public static Just<A> Just<A> (A a) {
+		return new Just<A> (a);
+	}
+
+	public static Nothing<A> Nothing<A> () {
+		return new Nothing<A> ();
+	}
+
 	public static Maybe<A> Make<A> ( A obj ){
 		return obj == null ? new Nothing<A> () as Maybe<A> : new Just<A> (obj) as Maybe<A>;
 	}
@@ -109,5 +99,27 @@ public static class Maybe {
 	public static Maybe<B> Apply<A,B> (Func<A,B> f, A a){
 		return Make (a).FMap (f);
 	}
+
+}
+
+public static partial class Fn {
+
+	//FMap :: (a -> b) -> Maybe a -> Maybe b
+	public static Maybe<B> FMap<A,B> (Func<A,B> f, Maybe<A> F) {
+		return F.FMap (f);
+	}
+
+	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
+	public static Func<Maybe<A>,Maybe<B>> FMap<Maybe,A,B> (Func<A,B> f) {
+		return F => F.FMap (f);
+	}
+
+
+	//FMap :: (a -> void) -> Maybe a -> Maybe a
+	public static Maybe<A> FMap<A> (Action<A> f, Maybe<A> F) {
+		return F.FMap (f);
+	}
+
+
 
 }

@@ -1,4 +1,4 @@
 CS-Lam
 ======
 
-Functional Programming Library for C# that intends to be as faithful to Haskell's as possible.
+The Functional Programming Library in C# for people who want to stay DRY. It also intends to be as faithful to Haskell's API as possible

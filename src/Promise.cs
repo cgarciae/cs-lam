@@ -213,20 +213,30 @@ public class Broken : Promise {
 	}
 }
 
+public class TPromise {}
+
 public static partial class Fn {
 
+	public static Promise<R,B> FMap<R,A,B> (Func<A,B> f, Promise<R,A> F) {
+		return F.FMap (f);
+	}
+
+	public static Promise<R,A> FMap<R,A> (Action<A> f, Promise<R,A> F) {
+		return F.FMap (f);
+	}
+
 	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
-	public static Func<Promise<R,A>,Promise<R,B>> FMap<Promise,R,A,B> (Func<A,B> f) {
+	public static Func<Promise<R,A>,Promise<R,B>> FMap<TPromise,R,A,B> (Func<A,B> f) {
 		return F => F.FMap (f);
 	}
 
 	//FMap :: (a -> void) -> (Maybe a -> Maybe a)
-	public static Func<Promise<R,A>,Promise<R,A>> FMap<Promise,R,A> (Action<A> f) {
+	public static Func<Promise<R,A>,Promise<R,A>> FMap<TPromise,R,A> (Action<A> f) {
 		return F => F.FMap (f);
 	}
 
 	//FMap :: (a -> void) -> (Maybe a -> Maybe a)
-	public static Func<Promise<A,A>,Promise<A,A>> FMap<Promise,A> (Action<A> f) {
+	public static Func<Promise<A,A>,Promise<A,A>> FMap<TPromise,A> (Action<A> f) {
 		return F => F.FMap (f);
 	}
 }

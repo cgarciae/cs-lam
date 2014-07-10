@@ -77,49 +77,41 @@ public class Nothing<A> : Maybe<A> {
 	}
 }
 
-public static class Maybe {
+public class TMaybe {}
+
+public static partial class Fn {
 
 	public static Just<A> Just<A> (A a) {
 		return new Just<A> (a);
 	}
-
+	
 	public static Nothing<A> Nothing<A> () {
 		return new Nothing<A> ();
 	}
 
-	public static Maybe<A> Make<A> ( A obj ){
+	public static Maybe<A> MakeMaybe<A> ( A obj ){
 		return obj == null ? new Nothing<A> () as Maybe<A> : new Just<A> (obj) as Maybe<A>;
 	}
 
-	//Maybe.Apply :: (a -> b) -> (a -> Maybe b)
-	public static Func<A,Maybe<B>> Apply<A,B> (Func<A,B> f){
-		return a => Apply (f, a);
-	}
-	//Maybe.Apply :: (a -> b) -> a -> Maybe b
-	public static Maybe<B> Apply<A,B> (Func<A,B> f, A a){
-		return Make (a).FMap (f);
-	}
 
-}
-
-public static partial class Fn {
-
+	// FUNCTOR
+	
 	//FMap :: (a -> b) -> Maybe a -> Maybe b
 	public static Maybe<B> FMap<A,B> (Func<A,B> f, Maybe<A> F) {
 		return F.FMap (f);
 	}
-
-	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
-	public static Func<Maybe<A>,Maybe<B>> FMap<Maybe,A,B> (Func<A,B> f) {
-		return F => F.FMap (f);
-	}
-
-
+	
 	//FMap :: (a -> void) -> Maybe a -> Maybe a
 	public static Maybe<A> FMap<A> (Action<A> f, Maybe<A> F) {
 		return F.FMap (f);
 	}
+	
+	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
+	public static Func<Maybe<A>,Maybe<B>> FMap<TMaybe,A,B> (Func<A,B> f) {
+		return F => F.FMap (f);
+	}
 
+	// APPLICATIVE
 
 
 }

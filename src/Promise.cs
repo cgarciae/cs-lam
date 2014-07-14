@@ -217,6 +217,22 @@ public class TPromise {}
 
 public static partial class Fn {
 
+	public static Promise<A,A> MakePromise<A>() {
+		return new Pending<A,A> (Help.Id<A>);
+	}
+	
+	public static Promise<A,B> MakePromise<A,B> (Func<A,B> f) {
+		return new Pending<A,B> (f);
+	}
+	
+	public static Promise<A,A> MakePromise<A> (Action<A> f) {
+		return new Pending<A,A> (f.ToFunc ());
+	}
+	
+	public static Promise<A,A> MakePromise<A> (A val) {
+		return new Resolved<A,A> (val);
+	}
+
 	public static Promise<R,B> FMap<R,A,B> (Func<A,B> f, Promise<R,A> F) {
 		return F.FMap (f);
 	}

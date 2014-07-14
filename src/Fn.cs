@@ -221,3 +221,7 @@ public interface Functor<A> {
 	Functor<B> FMap<B> (Func<A,B> f);
 	Functor<A> FMap (Action<A> f);
 }
+
+public interface Applicative<A> : Functor<A> {
+	Functor<A> Pure (A a);
+}

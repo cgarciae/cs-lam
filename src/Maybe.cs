@@ -2,12 +2,16 @@
 using System;
 using System.Collections;
 
-public abstract class Maybe <A> : Functor<A> {
+public abstract class Maybe <A> : Applicative<A> {
 
 	public abstract bool IsNothing {get;}
 	public abstract A value {get;}
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
 	public abstract Maybe<A> FMap (Action<A> f);
+
+	public Maybe<A> Pure (A a) {
+		return Fn.MakeMaybe (a);
+	}
 
 	Functor<B> Functor<A>.FMap<B> (Func<A, B> f)
 	{
@@ -17,6 +21,11 @@ public abstract class Maybe <A> : Functor<A> {
 	Functor<A> Functor<A>.FMap (Action<A> f)
 	{
 		return FMap (f);
+	}
+
+	Functor<A> Applicative<A>.Pure (A a)
+	{
+		return Pure (a);
 	}
 }
 
@@ -89,7 +98,7 @@ public static partial class Fn {
 		return new Nothing<A> ();
 	}
 
-	public static Maybe<A> MakeMaybe<A> ( A obj ){
+	public static Maybe<A> MakeMaybe<A> (A obj) {
 		return obj == null ? new Nothing<A> () as Maybe<A> : new Just<A> (obj) as Maybe<A>;
 	}
 
@@ -113,5 +122,29 @@ public static partial class Fn {
 
 	// APPLICATIVE
 
+	//Pure :: a -> Maybe a
+	public static Maybe<A> Pure<TMaybe,A> (A a) {
+		return MakeMaybe (a);
+	}
+
+	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
+	public static Maybe<B> Apply<A,B> (this Maybe<Func<A,B>> mf, Maybe<A> m) {
+		return mf.IsNothing ? new Nothing<B>() : m.FMap (mf.value);
+	}
+
+	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
+	public static Maybe<A> Apply<A> (this Maybe<Action<A>> mf, Maybe<A> m) {
+		return mf.IsNothing ? new Nothing<A>() : m.FMap (mf.value);
+	}
+
+	//Apply :: Maybe (a -> b) -> (Maybe a -> Maybe b)
+	public static Func<Maybe<Func<A,B>>,Maybe<B>> Apply<TMaybe,A,B> (Maybe<A> m) {
+		return mf => mf.IsNothing ? new Nothing<B>() : m.FMap (mf.value);
+	}
+
+	//Apply :: Maybe (a -> void) -> (Maybe a -> Maybe a)
+	public static Func<Maybe<Action<A>>,Maybe<A>> Apply<TMaybe,A> (Maybe<A> m) {
+		return mf => mf.IsNothing ? new Nothing<A>() : m.FMap (mf.value);
+	}
 
 }

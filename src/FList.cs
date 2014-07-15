@@ -61,6 +61,33 @@ public static partial class Fn {
 		return f => a => e => FoldL (f, a, e);
 	}
 
+	public static Func<int,int> add1 () {
+		return a => a + 1;
+	}
+
+	public static Func<int,int> add2 = Fn.Compose (add1(),add1());
+
+	// ScanL :: :: (a -> a -> a) -> [a] -> [a]
+	public static IEnumerable<A> ScanL1<A> (Func<A,A,A> f, IEnumerable<A> e) {
+		A a;
+
+		var num = e.GetEnumerator ();
+		num.MoveNext ();
+		yield return (a = num.Current);
+
+		while (num.MoveNext()) {
+			yield return (a = f (a, num.Current));
+		}
+	}
+
+	// ScanL :: :: (a -> b -> a) -> a -> [b] -> a
+	public static IEnumerable<A> ScanL<A,B> (Func<A,B,A> f, A a, IEnumerable<B> e) {
+		yield return a;
+		foreach (var b in e) {
+			yield return (a = f (a, b));
+		}
+	}
+
 	// Repeat :: a -> [a]
 	// a.Repeat :: [a]
 	public static IEnumerable<A> Repeat<A> (this A a) {
@@ -71,10 +98,11 @@ public static partial class Fn {
 
 	// Take :: int -> [a] -> [a]
 	public static IEnumerable<A> Take<A> (int n, IEnumerable<A> e) {
-		var ator = e.GetEnumerator ();
+		var num = e.GetEnumerator ();
 		
-		var i = -1; while (++i < n && ator.MoveNext()) {
-			yield return ator.Current;
+		var i = -1;
+		while (++i < n && num.MoveNext()) {
+			yield return num.Current;
 		}
 	}
 

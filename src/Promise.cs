@@ -19,10 +19,6 @@ public abstract class Promise<A,B> : Functor<B> {
 		return FMap (f);
 	}
 
-	Functor<B> Functor<B>.FMap (Action<B> f) {
-		return FMap (f);
-	}
-
 }
 
 public class Pending<A,B> : Promise<A,B> {
@@ -52,7 +48,7 @@ public class Pending<A,B> : Promise<A,B> {
 
 	public override Promise<A,B> Resolve (A val)
 	{
-		return new Resolved<A,B> (f (val));
+		return val == null ? new Broken<A,B>() as Promise<A,B> : new Resolved<A,B> (f (val)) as Promise<A,B>;
 	}
 
 	public override Promise<A,B> Reject ()
@@ -143,77 +139,86 @@ public class Broken<A,B> : Promise<A,B> {
 	}
 }
 
-public interface Promise {
+public interface PromiseAction {
 	
-	Promise FMap (Action g);
-	Promise resolve ();
-	Promise reject ();
+	PromiseAction FMap (Action g);
+	PromiseAction resolve ();
+	PromiseAction reject ();
 }
 
-public class Pending : Promise {
+public class Pending : PromiseAction {
 	Action f;
 
 	public Pending (Action g) {
 		f = g;
 	}
 
-	public Promise FMap (Action g)
+	public PromiseAction FMap (Action g)
 	{
 		f = Fn.Compose (g, f);
 		return this;
 	}
 
-	public Promise resolve ()
+	public PromiseAction resolve ()
 	{
 		f ();
 		return new Resolved ();
 	}
 
-	public Promise reject ()
+	public PromiseAction reject ()
 	{
 		return new Broken ();
 	}
 }
 
-public class Resolved : Promise {
+public class Resolved : PromiseAction {
 
-	public Promise FMap (Action g)
+	public PromiseAction FMap (Action g)
 	{
 		g ();
 		return this;
 	}
 
-	public Promise resolve ()
+	public PromiseAction resolve ()
 	{
 		return this;
 	}
 
-	public Promise reject ()
+	public PromiseAction reject ()
 	{
 		return this;
 	}
 
 }
 
-public class Broken : Promise {
+public class Broken : PromiseAction {
 
-	public Promise FMap (Action g)
+	public PromiseAction FMap (Action g)
 	{
 		return this;
 	}
 
-	public Promise resolve ()
+	public PromiseAction resolve ()
 	{
 		return this;
 	}
 
-	public Promise reject ()
+	public PromiseAction reject ()
 	{
 		return this;
 	}
 }
 
-public class TPromise {}
+public class TPromise{
+	private static TPromise _i;
+	public static TPromise i {
+		get {
+			if (_i != null) _i = new TPromise();
+			return _i;
+		}
+	}
+	private TPromise (){}
+}
 
 public static partial class Fn {
 
@@ -230,7 +235,7 @@ public static partial class Fn {
 	}
 	
 	public static Promise<A,A> MakePromise<A> (A val) {
-		return new Resolved<A,A> (val);
+		return val == null ? new Broken<A,A>() as Promise<A,A> : new Resolved<A,A> (val) as Promise<A,A>;
 	}
 
 	public static Promise<R,B> FMap<R,A,B> (Func<A,B> f, Promise<R,A> F) {
@@ -242,17 +247,17 @@ public static partial class Fn {
 	}
 
 	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
-	public static Func<Promise<R,A>,Promise<R,B>> FMap<TPromise,R,A,B> (Func<A,B> f) {
+	public static Func<Promise<R,A>,Promise<R,B>> FMap<R,A,B> (TPromise _, Func<A,B> f) {
 		return F => F.FMap (f);
 	}
 
 	//FMap :: (a -> void) -> (Maybe a -> Maybe a)
-	public static Func<Promise<R,A>,Promise<R,A>> FMap<TPromise,R,A> (Action<A> f) {
+	public static Func<Promise<R,A>,Promise<R,A>> FMap<R,A> (TPromise _, Action<A> f) {
 		return F => F.FMap (f);
 	}
 
 	//FMap :: (a -> void) -> (Maybe a -> Maybe a)
-	public static Func<Promise<A,A>,Promise<A,A>> FMap<TPromise,A> (Action<A> f) {
+	public static Func<Promise<A,A>,Promise<A,A>> FMap<A> (TPromise _, Action<A> f) {
 		return F => F.FMap (f);
 	}
 }

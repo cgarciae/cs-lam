@@ -199,7 +199,7 @@ public static partial class Fn {
 
 	//FMap :: (a -> void) -> F a -> F a
 	public static Functor <A> FMap<A> (Action<A> f, Functor <A> F) {
-		return F.FMap (f);
+		return F.FMap (f.ToFunc ());
 	}
 
 	//FMap :: (a -> b) -> (F a -> F b)
@@ -219,7 +219,6 @@ public static partial class Fn {
 //Interfaces
 public interface Functor<A> {
 	Functor<B> FMap<B> (Func<A,B> f);
-	Functor<A> FMap (Action<A> f);
 }
 
 public interface Applicative<A> : Functor<A> {

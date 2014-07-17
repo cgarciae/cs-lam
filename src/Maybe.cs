@@ -128,6 +128,11 @@ public static partial class Fn {
 		return F => F.FMap (f);
 	}
 
+	//FMap :: (a -> b) -> (Maybe a -> Maybe b)
+	public static Func<Maybe<A>,Maybe<A>> FMap<A> (TMaybe _, Action<A> f) {
+		return F => F.FMap (f);
+	}
+
 	// APPLICATIVE
 
 	//Pure :: a -> Maybe a

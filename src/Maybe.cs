@@ -22,24 +22,36 @@ public abstract class Maybe <A> : Applicative<A> {
 	{
 		return Pure (a);
 	}
+
+	public static bool operator true (Maybe<A> m) {
+		return ! m.IsNothing;
+	}
+
+	public static bool operator false (Maybe<A> m) {
+		return m.IsNothing;
+	}
+
+	public static bool operator ! (Maybe<A> m) {
+		return m.IsNothing;
+	}
 }
 
 public class Just<A> : Maybe<A> {
 	
-	A val;
+	A a;
 	
 	public Just (A val) {
-		this.val = val;
+		this.a = val;
 	}
 	
 	public override Maybe<B> FMap <B> (Func <A, B> f)
 	{
-		return Fn.MakeMaybe (f (val));
+		return Fn.MakeMaybe (f (a));
 	}
 	
 	public override Maybe<A> FMap (Action<A> f)
 	{
-		f (val);
+		f (a);
 		return this;
 	}
 	
@@ -51,9 +63,10 @@ public class Just<A> : Maybe<A> {
 	
 	public override A value {
 		get {
-			return val;
+			return a;
 		}
 	}
+
 }
 
 public class Nothing<A> : Maybe<A> {
@@ -142,22 +155,22 @@ public static partial class Fn {
 
 	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
 	public static Maybe<B> Apply<A,B> (this Maybe<Func<A,B>> mf, Maybe<A> m) {
-		return mf.IsNothing ? new Nothing<B>() : m.FMap (mf.value);
+		return mf ? new Nothing<B>() : m.FMap (mf.value);
 	}
 
 	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
 	public static Maybe<A> Apply<A> (this Maybe<Action<A>> mf, Maybe<A> m) {
-		return mf.IsNothing ? new Nothing<A>() : m.FMap (mf.value);
+		return mf ? new Nothing<A>() : m.FMap (mf.value);
 	}
 
 	//Apply :: Maybe (a -> b) -> (Maybe a -> Maybe b)
 	public static Func<Maybe<Func<A,B>>,Maybe<B>> Apply<A,B> (TMaybe _, Maybe<A> m) {
-		return mf => mf.IsNothing ? new Nothing<B>() : m.FMap (mf.value);
+		return mf => mf ? new Nothing<B>() : m.FMap (mf.value);
 	}
 
 	//Apply :: Maybe (a -> void) -> (Maybe a -> Maybe a)
 	public static Func<Maybe<Action<A>>,Maybe<A>> Apply<A> (TMaybe _, Maybe<A> m) {
-		return mf => mf.IsNothing ? new Nothing<A>() : m.FMap (mf.value);
+		return mf => mf ? new Nothing<A>() : m.FMap (mf.value);
 	}
 
 }

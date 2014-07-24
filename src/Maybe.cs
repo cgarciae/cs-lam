@@ -38,20 +38,20 @@ public abstract class Maybe <A> : Applicative<A> {
 
 public class Just<A> : Maybe<A> {
 	
-	A a;
+	public readonly A val;
 	
 	public Just (A val) {
-		this.a = val;
+		this.val = val;
 	}
 	
 	public override Maybe<B> FMap <B> (Func <A, B> f)
 	{
-		return Fn.MakeMaybe (f (a));
+		return Fn.MakeMaybe (f (val));
 	}
 	
 	public override Maybe<A> FMap (Action<A> f)
 	{
-		f (a);
+		f (val);
 		return this;
 	}
 	
@@ -63,7 +63,7 @@ public class Just<A> : Maybe<A> {
 	
 	public override A value {
 		get {
-			return a;
+			return val;
 		}
 	}
 

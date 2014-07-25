@@ -151,6 +151,24 @@ public static partial class Fn {
 		};
 	}
 
+	//o
+	public static Func<A,C> o<A,B,C> (this Func<B,C> f, Func<A,B> g) {
+		return f.Of (g);
+	}
+	
+	public static Func<A,B> o<A,B> (this Func<A,B> f, Action<A> g) {
+		return f.Of (g);
+	}
+	
+	public static Func<A,B> o<A,B> (this Action<B> f, Func<A,B> g) {
+		return f.Of (g);
+	}
+	
+	public static Action<A> o<A> (this Action<A> f, Action<A> g) {
+		return f.Of (g);
+	}
+
+
 	public static Action Of (this Action f, Action g) {
 		return () => {
 			g();

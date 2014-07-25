@@ -5,17 +5,19 @@ using System.Collections;
 public abstract class DoIf<A> : Functor<A> {
 
 	internal Func<bool> condition = () => false;
+	internal Func<bool> guard = () => true;
 
 	public bool truth {
 		get {
-			return condition();
+			return condition() && guard();
 		}
 	}
 
 	public abstract DoIf<B> FMap<B> (Func<A,B> f);
 	public abstract DoIf<A> FMap (Action<A> f);
 	public abstract DoIf<A> Try ();
-	public abstract DoIf<A> If (Func<bool> p);
+	public abstract DoIf<A> If (Func<bool> cond);
+	public abstract DoIf<A> Guard (Func<bool> cond);
 	public abstract A value {get;}
 	public abstract bool IsWaiting {get;}
 
@@ -54,6 +56,12 @@ public class Waiting<A> : DoIf<A> {
 		fa = f;
 		condition = cond;
 	}
+
+	public Waiting (Func<A> f, Func<bool> cond, Func<bool> guard) {
+		fa = f;
+		condition = cond;
+		this.guard = guard;
+	}
 	
 	public Waiting (A a, Func<bool> cond) {
 		fa = () => a;
@@ -62,22 +70,27 @@ public class Waiting<A> : DoIf<A> {
 
 	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
-		return new Waiting<B> (() => f (fa ()));
+		return new Waiting<B> (() => f (fa ()), condition, guard);
 	}
 
 	public override DoIf<A> FMap (Action<A> f)
 	{
-		return new Waiting<A> (() => f.ToFunc () (fa ()));
+		return new Waiting<A> (() => f.ToFunc () (fa ()), condition, guard);
 	}
 
 	public override DoIf<A> If (Func<bool> cond)
 	{
-		return new Waiting<A> (fa, () => cond() || condition());
+		return new Waiting<A> (fa, () => cond() || condition(), guard);
+	}
+
+	public override DoIf<A> Guard (Func<bool> cond)
+	{
+		return new Waiting<A> (fa, condition, () => cond () && guard ());
 	}
 
 	public override DoIf<A> Try ()
 	{
-		return truth ? new Done<A>(fa(), condition) as DoIf<A> : this as DoIf<A>;
+		return truth ? new Done<A>(fa(), condition, guard) as DoIf<A> : this as DoIf<A>;
 	}
 
 	public override A value {
@@ -106,9 +119,15 @@ public class Done<A> : DoIf<A> {
 		condition = cond;
 	}
 
+	public Done (A val, Func<bool> cond, Func<bool> guard) {
+		a = val;
+		condition = cond;
+		this.guard = guard;
+	}
+
 	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
-		return new Waiting<A> (a, condition).FMap (f);
+		return new Waiting<A> (() => a, condition, guard).FMap (f);
 	}
 
 	public override DoIf<A> FMap (Action<A> f)
@@ -123,7 +142,12 @@ public class Done<A> : DoIf<A> {
 
 	public override DoIf<A> If (Func<bool> cond)
 	{
-		return new Done<A> (a, () => cond () || condition ());
+		return new Done<A> (a, () => cond () || condition (), guard);
+	}
+
+	public override DoIf<A> Guard (Func<bool> cond)
+	{
+		return new Done<A> (a, condition, () => cond() && guard());
 	}
 
 	public override A value {

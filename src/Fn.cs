@@ -4,6 +4,12 @@ using System.Collections;
 
 public static partial class Fn {
 
+	public static A Id<A> (A x){
+		return x;
+	}
+
+	public static Action DoNothing = () => {};
+
 	//ToFunc :: (a -> void) -> (a -> a)
 	public static Func<A, A> ToFunc<A>(this Action<A> act)
 	{

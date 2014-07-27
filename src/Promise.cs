@@ -223,7 +223,7 @@ public class TPromise{
 public static partial class Fn {
 
 	public static Promise<A,A> MakePromise<A>() {
-		return new Pending<A,A> (Help.Id<A>);
+		return new Pending<A,A> (Fn.Id<A>);
 	}
 	
 	public static Promise<A,B> MakePromise<A,B> (Func<A,B> f) {

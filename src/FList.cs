@@ -31,6 +31,19 @@ public static partial class Fn {
 
 public static partial class Fn {
 
+	// Map :: (a -> b) -> [a] -> [b]
+	public static List<B> Map<A,B> (Func<A,B> f, List<A> e) {
+		return FMap (f, e).ToList ();
+	}
+	// Map :: (a -> b) -> ([a] -> [b])
+	public static Func<List<A>,List<B>> Map<A,B> (Func<A,B> f) {
+		return e => FMap (f, e).ToList ();
+	}
+	// Map :: ((a -> b) -> ([a] -> [b]))
+	public static Func<Func<A,B>,Func<List<A>,List<B>>> Map<A,B> () {
+		return f => e => FMap (f, e).ToList ();
+	}
+
 	// Reverse :: [a] -> [a]
 	public static IEnumerable<A> Reverse<A> (IEnumerable<A> e) {
 		return e.Reverse ();
@@ -61,11 +74,25 @@ public static partial class Fn {
 		return f => a => e => FoldL (f, a, e);
 	}
 
-	public static Func<int,int> add1 () {
-		return a => a + 1;
+	// ZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+	public static IEnumerable<C> ZipWith<A,B,C> (Func<A,B,C> f, IEnumerable<A> ea, IEnumerable<B> eb) {
+		var a = ea.GetEnumerator ();
+		var b = eb.GetEnumerator ();
+
+		while (b.MoveNext() && a.MoveNext()) {
+			yield return f (a.Current, b.Current);
+		}
 	}
 
-	public static Func<int,int> add2 = Fn.Compose (add1(),add1());
+	// ZipWith :: (a -> b -> c) -> ([a] -> ([b] -> [c]))
+	public static Func<IEnumerable<A>,Func<IEnumerable<B>,IEnumerable<C>>> ZipWith<A,B,C> (Func<A,B,C> f) {
+		return ea => eb => ZipWith (f, ea, eb);
+	}
+
+	// ZipWith :: ((a -> b -> c) -> ([a] -> ([b] -> [c])))
+	public static Func<Func<A,B,C>,Func<IEnumerable<A>,Func<IEnumerable<B>,IEnumerable<C>>>> ZipWith<A,B,C> () {
+		return f => ea => eb => ZipWith (f, ea, eb);
+	}
 
 	// ScanL :: :: (a -> a -> a) -> [a] -> [a]
 	public static IEnumerable<A> ScanL1<A> (Func<A,A,A> f, IEnumerable<A> e) {

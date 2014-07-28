@@ -94,6 +94,11 @@ public static partial class Fn {
 		return f => ea => eb => ZipWith (f, ea, eb);
 	}
 
+	// ZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+	public static IEnumerable<B> ZipWith<A,B> (Action<A,B> f, IEnumerable<A> ea, IEnumerable<B> eb) {
+		return ZipWith (f.ToFunc (), ea, eb);  
+	}
+
 	// ScanL :: :: (a -> a -> a) -> [a] -> [a]
 	public static IEnumerable<A> ScanL1<A> (Func<A,A,A> f, IEnumerable<A> e) {
 		A a;

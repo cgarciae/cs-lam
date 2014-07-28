@@ -19,6 +19,14 @@ public static partial class Fn {
 		};
 	}
 
+	public static Func<A,B,B> ToFunc<A,B>(this Action<A,B> act)
+	{
+		return (a, b) => { 
+			act(a, b); 
+			return b; 
+		};
+	}
+
 	//ToFunc :: (void -> void) -> (a -> a)
 	public static Func<A, A> ToFunc<A>(this Action act)
 	{

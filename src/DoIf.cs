@@ -15,8 +15,12 @@ public abstract class DoIf<A> : Functor<A> {
 
 	public abstract DoIf<B> FMap<B> (Func<A,B> f);
 	public abstract DoIf<A> FMap (Action<A> f);
+	public abstract DoIf<A> Do (Func<A> f);
 	public abstract DoIf<A> Try ();
 	public abstract DoIf<A> If (Func<bool> cond);
+	public DoIf<A> If (bool cond) {
+		return If (() => cond);
+	}
 	public abstract DoIf<A> Guard (Func<bool> cond);
 	public abstract A value {get;}
 	public abstract bool IsWaiting {get;}
@@ -44,6 +48,13 @@ public class Waiting<A> : DoIf<A> {
 
 	Func<A> fa;
 
+	public Waiting () {
+		fa = () => {
+			throw new ArgumentException("Undefined Action");
+			return default(A);
+		};
+	}
+
 	public Waiting (Func<A> f) {
 		fa = f;
 	}
@@ -68,24 +79,29 @@ public class Waiting<A> : DoIf<A> {
 		condition = cond;
 	}
 
+	public override DoIf<A> Do (Func<A> f) {
+		this.fa = f;
+		return Try ();
+	}
+
 	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
-		return new Waiting<B> (() => f (fa ()), condition, guard);
+		return new Waiting<B> (() => f (fa ()), condition, guard).Try ();
 	}
 
 	public override DoIf<A> FMap (Action<A> f)
 	{
-		return new Waiting<A> (() => f.ToFunc () (fa ()), condition, guard);
+		return new Waiting<A> (() => f.ToFunc () (fa ()), condition, guard).Try();
 	}
 
 	public override DoIf<A> If (Func<bool> cond)
 	{
-		return new Waiting<A> (fa, () => cond() || condition(), guard);
+		return new Waiting<A> (fa, () => cond() || condition(), guard).Try();
 	}
 
 	public override DoIf<A> Guard (Func<bool> cond)
 	{
-		return new Waiting<A> (fa, condition, () => cond () && guard ());
+		return new Waiting<A> (fa, condition, () => cond () && guard ()).Try();
 	}
 
 	public override DoIf<A> Try ()
@@ -127,12 +143,16 @@ public class Done<A> : DoIf<A> {
 
 	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
-		return new Waiting<A> (() => a, condition, guard).FMap (f);
+		return new Waiting<A> (() => a, condition, guard).FMap (f).Try();
 	}
 
 	public override DoIf<A> FMap (Action<A> f)
 	{
 		return FMap (f.ToFunc ());
+	}
+
+	public override DoIf<A> Do (Func<A> f) {
+		return new Waiting<A> (f, condition).Try();
 	}
 
 	public override DoIf<A> Try ()
@@ -142,12 +162,12 @@ public class Done<A> : DoIf<A> {
 
 	public override DoIf<A> If (Func<bool> cond)
 	{
-		return new Done<A> (a, () => cond () || condition (), guard);
+		return new Done<A> (a, () => cond () || condition (), guard).Try();
 	}
 
 	public override DoIf<A> Guard (Func<bool> cond)
 	{
-		return new Done<A> (a, condition, () => cond() && guard());
+		return new Done<A> (a, condition, () => cond() && guard()).Try();
 	}
 
 	public override A value {
@@ -173,12 +193,13 @@ public abstract class DoIf {
 		}
 	}
 	
-	public DoIf FMap<B> (Action f) {
-		return new Waiting (f, condition);
-	}
-
+	public abstract DoIf FMap (Action g);
+	public abstract DoIf Do (Action g);
 	public abstract DoIf Try ();
 	public abstract DoIf If (Func<bool> cond);
+	public DoIf If (bool cond) {
+		return If (() => cond);
+	}
 	public abstract bool IsWaiting {get;}
 
 	public static bool operator true (DoIf m) {
@@ -197,6 +218,13 @@ public abstract class DoIf {
 public class Waiting : DoIf {
 	Action f;
 
+	public Waiting (bool cond) {
+		f = () => {
+			throw new ArgumentNullException("Action not defined");
+		};
+		condition = () => cond;
+	}
+
 	public Waiting (Action g) {
 		f = g;
 	}
@@ -206,14 +234,25 @@ public class Waiting : DoIf {
 		condition = cond;
 	}
 
+	public override DoIf FMap (Action g)
+	{
+		return new Waiting ((g) .o (f), condition).Try ();
+	}
+
+	public override DoIf Do (Action g)
+	{
+		f = g;
+		return Try ();
+	}
+
 	public override DoIf Try ()
 	{
-		return truth ? new Done (f) as DoIf : this as DoIf;
+		return truth ? new Done (f).Try() as DoIf : this as DoIf;
 	}
 
 	public override DoIf If (Func<bool> cond)
 	{
-		return new Waiting (f, () => cond () || condition ());
+		return new Waiting (f, () => cond () || condition ()).Try();
 	}
 
 	public override bool IsWaiting {
@@ -237,14 +276,51 @@ public class Done : DoIf {
 		return this;
 	}
 
+	public override DoIf FMap (Action g)
+	{
+		return new Waiting (g, condition).Try ();
+	}
+
+	public override DoIf Do (Action g)
+	{
+		return new Waiting (g).Try ();
+	}
+
 	public override DoIf If (Func<bool> cond)
 	{
-		return new Done (() => cond () || condition ());
+		return new Done (() => cond () || condition ()).Try();
 	}
 
 	public override bool IsWaiting {
 		get {
 			return false;
 		}
+	}
+}
+
+public static partial class Fn {
+
+	public static DoIf<A> Do<A> (Func<A> f) {
+		return new Waiting<A> (f);
+	}
+
+	public static DoIf Do (Action f) {
+		return new Waiting (f);
+	}
+
+	public static DoIf<A> If<A> (Func<bool> cond) {
+		return new Waiting<A> ().If (cond);
+	}
+
+	public static DoIf<A> If<A> (bool cond) {
+		return new Waiting<A> ().If (() => cond);
+	}
+
+	public static DoIf If (Func<bool> cond) {
+		return new Waiting (cond());
+	}
+	
+	public static DoIf If (bool cond) {
+		return new Waiting (cond);
 	}
 }

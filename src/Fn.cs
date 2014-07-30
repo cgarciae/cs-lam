@@ -190,6 +190,10 @@ public static partial class Fn {
 		};
 	}
 
+	public static Action o (this Action f, Action g) {
+		return (f) .Of (g);
+	}
+
 	//THEN
 	public static Func<A,C> Then<A,B,C> (this Func<A,B> f, Func<B,C> g) {
 		return g.Of (f);	

@@ -17,6 +17,16 @@ public static partial class Fn {
 		return F => F.Select (f);
 	}
 
+	//FMap :: (a -> void) -> IEnumerable a -> IEnumerable b
+	public static IEnumerable<A> FMap<A> (Action<A> f, IEnumerable<A> F) {
+		return F.Select (f.ToFunc());
+	}
+
+	//FMap :: (a -> b) -> (IEnumerable a -> IEnumerable b)
+	public static Func<IEnumerable<A>,IEnumerable<A>> FMap<TList,A> (Action<A> f) {
+		return F => FMap (f, F);
+	}
+
 	//Applicative
 	//Pure :: a -> [a]
 	public static IEnumerable<A> Pure<A> (TList _, A a) {
@@ -49,19 +59,19 @@ public static partial class Fn {
 		return Map (f, e);
 	}
 
-	// Map :: (a -> b) -> [a] -> [b]
+	// Map :: (a -> void) -> [a] -> [a]
 	public static List<A> Map<A> (Action<A> f, List<A> e) {
 		return Map (f.ToFunc(), e);
 	}
-	// Map :: (a -> b) -> ([a] -> [b])
+	// Map :: (a -> void) -> ([a] -> [a])
 	public static Func<List<A>,List<A>> Map<A> (Action<A> f) {
 		return e => Map (f, e);
 	}
-	// Map :: ((a -> b) -> ([a] -> [b]))
+	// Map :: ((a -> void) -> ([a] -> [a]))
 	public static Func<Action<A>,Func<List<A>,List<A>>> Map<A> () {
 		return f => e => Map (f, e);
 	}
-	// Map :: (a -> b) -> [a] -> [b]
+	// Map :: (a -> void) -> [a] -> [a]
 	public static List<A> Map<A> (this List<A> e, Action<A> f) {
 		return Map (f, e);
 	}

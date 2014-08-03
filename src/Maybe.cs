@@ -176,12 +176,12 @@ public static partial class Fn {
 	}
 
 	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
-	public static Maybe<B> ap<A,B> (this Maybe<Func<A,B>> mf, Maybe<A> m) {
+	public static Maybe<B> up<A,B> (this Maybe<Func<A,B>> mf, Maybe<A> m) {
 		return mf ? new Nothing<B>() : m.FMap (mf.value);
 	}
 	
 	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
-	public static Maybe<A> ap<A> (this Maybe<Action<A>> mf, Maybe<A> m) {
+	public static Maybe<A> up<A> (this Maybe<Action<A>> mf, Maybe<A> m) {
 		return mf ?  m.FMap (mf.value) : new Nothing<A>();
 	}
 
@@ -193,11 +193,11 @@ public static partial class Fn {
 		return m.FMap (f);
 	}
 
-	public static Maybe<B> ap<A,B> (this Func<A,B> f, Maybe<A> m) {
+	public static Maybe<B> up<A,B> (this Func<A,B> f, Maybe<A> m) {
 		return m.FMap (f);
 	}
 	
-	public static Maybe<A> ap<A> (this Action<A> f, Maybe<A> m) {
+	public static Maybe<A> up<A> (this Action<A> f, Maybe<A> m) {
 		return m.FMap (f);
 	}
 

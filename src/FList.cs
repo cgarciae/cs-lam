@@ -130,12 +130,7 @@ public static partial class Fn {
 
 	// Take :: int -> [a] -> [a]
 	public static IEnumerable<A> Take<A> (int n, IEnumerable<A> e) {
-		var num = e.GetEnumerator ();
-		
-		var i = -1;
-		while (++i < n && num.MoveNext()) {
-			yield return num.Current;
-		}
+		return e.Take (n);
 	}
 
 	// Take :: int -> ([a] -> [a])
@@ -143,9 +138,49 @@ public static partial class Fn {
 		return e => Take (n, e);
 	}
 
-	// [a].Take :: n -> IEnumerable a 
-	public static IEnumerable<A> Take<A> (this IEnumerable<A> e, int n) {
-		return Take (n, e);
+	// Take :: (int -> ([a] -> [a]))
+	public static Func<int,Func<IEnumerable<A>,IEnumerable<A>>> Take<A> () {
+		return n => e => Take (n, e);
+	}
+
+	// Drop :: int -> [a] -> [a]
+	public static IEnumerable<A> Drop<A> (int n, IEnumerable<A> e) {
+		return e.Skip (n);
+	}
+	
+	// Take :: int -> ([a] -> [a])
+	public static Func<IEnumerable<A>,IEnumerable<A>> Drop<A> (int n) {
+		return e => Drop (n, e);
+	}
+	
+	// Take :: (int -> ([a] -> [a]))
+	public static Func<int,Func<IEnumerable<A>,IEnumerable<A>>> Drop<A> () {
+		return n => e => Drop (n, e);
+	}
+
+	// Drop :: [a] -> int -> [a]
+	public static IEnumerable<A> Drop<A> (this IEnumerable<A> e, int n) {
+		return e.Skip (n);
+	}
+
+	// Slice :: int -> int -> [a] -> [a]
+	public static IEnumerable<A> Slice<A> (int from, int to, IEnumerable<A> e) {
+		return e.Take (to).Skip (from);
+	}
+
+	// Slice :: int -> (int -> ([a] -> [a]))
+	public static Func<int,Func<IEnumerable<A>,IEnumerable<A>>> Slice<A> (int from) {
+		return to => e => Slice(from, to, e);
+	}
+
+	// Slice :: (int -> (int -> ([a] -> [a])))
+	public static Func<int,Func<int,Func<IEnumerable<A>,IEnumerable<A>>>> Slice<A> () {
+		return from => to => e => Slice(from, to, e);
+	}
+
+	// Slice :: int -> int -> [a] -> [a]
+	public static IEnumerable<A> Slice<A> (this IEnumerable<A> e, int from, int to) {
+		return Slice (from, to, e);
 	}
 
 	// Iterate :: (a -> a) -> a -> [a]

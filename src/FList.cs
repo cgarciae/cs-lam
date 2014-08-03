@@ -44,6 +44,28 @@ public static partial class Fn {
 		return f => e => FMap (f, e).ToList ();
 	}
 
+	// Map :: (a -> b) -> [a] -> [b]
+	public static List<B> Map<A,B> (this List<A> e, Func<A,B> f) {
+		return Map (f, e);
+	}
+
+	// Map :: (a -> b) -> [a] -> [b]
+	public static List<A> Map<A> (Action<A> f, List<A> e) {
+		return Map (f.ToFunc(), e);
+	}
+	// Map :: (a -> b) -> ([a] -> [b])
+	public static Func<List<A>,List<A>> Map<A> (Action<A> f) {
+		return e => Map (f, e);
+	}
+	// Map :: ((a -> b) -> ([a] -> [b]))
+	public static Func<Action<A>,Func<List<A>,List<A>>> Map<A> () {
+		return f => e => Map (f, e);
+	}
+	// Map :: (a -> b) -> [a] -> [b]
+	public static List<A> Map<A> (this List<A> e, Action<A> f) {
+		return Map (f, e);
+	}
+
 	// Reverse :: [a] -> [a]
 	public static IEnumerable<A> Reverse<A> (IEnumerable<A> e) {
 		return e.Reverse ();

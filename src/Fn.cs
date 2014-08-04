@@ -111,7 +111,10 @@ public static partial class Fn {
 
 	//COMPOSE Action :: (void -> void) -> (void -> void) -> (void -> void)
 	public static Action Compose (Action g, Action f) {
-		return Compose (g, f);
+		return () => {
+			f();
+			g();
+		};
 	}
 	
 	public static Action Compose (Action h, Action g, Action f) {

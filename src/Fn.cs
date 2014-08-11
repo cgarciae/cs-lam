@@ -9,6 +9,8 @@ public static partial class Fn {
 	}
 
 	public static Action DoNothing = () => {};
+	public static Func<bool> False = () => false;
+	public static Func<bool> True = () => true;
 
 	//ToFunc :: (a -> void) -> (a -> a)
 	public static Func<A, A> ToFunc<A>(this Action<A> act)
@@ -214,8 +216,8 @@ public static partial class Fn {
 		return g.Of (f);
 	}
 	
-	public static Action Then<A> (Action f, Action g) {
-		return g.Of (f);
+	public static Action Then (this Action f, Action g) {
+		return (g) .o (f);
 	}
 
 	//Curry :: (a -> b -> c) -> (a -> (b -> c))

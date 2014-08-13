@@ -155,10 +155,24 @@ public static partial class Fn {
 	// Repeat :: a -> [a]
 	// a.Repeat :: [a]
 	public static IEnumerable<A> Repeat<A> (this A a) {
-		while (true) yield return a;
-		Pure (TMaybe.i, 1);
-		Fn.MakeMaybe (1);
+		while (true)
+			yield return a;
 	}
+
+	public static IEnumerable<A> Repeat<A> (this Func<A> f) {
+		while (true)
+			yield return f();
+	}
+
+	public static IEnumerable Repeat (this Action f) {
+		while (true) {
+			f();
+			yield return null;
+		}
+			
+	}
+
+
 
 	// Take :: int -> [a] -> [a]
 	public static IEnumerable<A> Take<A> (int n, IEnumerable<A> e) {
@@ -242,6 +256,68 @@ public static partial class Fn {
 	public static Func<IEnumerable<A>,IEnumerable<A>> Cycle<A> () {
 		return e => Cycle (e);
 	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable<A> Join<A> (IEnumerable<A> a, IEnumerable<A> b) {
+		var enuA = a.GetEnumerator ();
+		var enuB = b.GetEnumerator ();
+
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static Func<IEnumerable<A>,IEnumerable<A>> Join<A> (IEnumerable<A> a) {
+		return b => Join (a, b);
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static Func<IEnumerable<A>,Func<IEnumerable<A>,IEnumerable<A>>> Join<A> () {
+		return a => b => Join (a, b);
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable Join (this IEnumerable a, IEnumerable b) {
+		var enuA = a.GetEnumerator ();
+		var enuB = b.GetEnumerator ();
+		
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+		
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static Func<IEnumerable,IEnumerable> Join (IEnumerable a) {
+		return b => Join (a, b);
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static Func<IEnumerable,Func<IEnumerable,IEnumerable>> Join () {
+		return a => b => Join (a, b);
+	}
+
+	public static IEnumerable Then (this IEnumerable a, IEnumerable b) {
+		return Join (a, b);
+	}
+
+	public static IEnumerable Then (this IEnumerable a, Action f) {
+		return Join (a, PureEnumeble (f));
+	}
+
+	public static IEnumerable PureEnumeble (Action f) {
+		f ();
+		yield return null;
+	}
+
+	public static Func<Action,IEnumerable> PureEnumeble () {
+		return f => PureEnumeble (f);
+	}
+
 }
 
 public class TList {

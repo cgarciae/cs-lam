@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections;
 
@@ -10,7 +10,7 @@ public abstract class Maybe <A> : Applicative<A> {
 	public abstract Maybe<A> FMap (Action<A> f);
 
 	public Maybe<A> Pure (A a) {
-		return Fn.MakeMaybe (a);
+		return Fn.Maybe (a);
 	}
 
 	Functor<B> Functor<A>.FMap<B> (Func<A, B> f)
@@ -46,7 +46,7 @@ public class Just<A> : Maybe<A> {
 	
 	public override Maybe<B> FMap <B> (Func <A, B> f)
 	{
-		return Fn.MakeMaybe (f (val));
+		return Fn.Maybe (f (val));
 	}
 	
 	public override Maybe<A> FMap (Action<A> f)
@@ -115,24 +115,24 @@ public static partial class Fn {
 		return new Nothing<A> ();
 	}
 
-	public static Maybe<A> MakeMaybe<A> (A a) {
+	public static Maybe<A> Maybe<A> (A a) {
 		return Equals (a, default(A)) ? new Nothing<A> () as Maybe<A> : new Just<A> (a) as Maybe<A>;
 	}
 
-	public static Maybe<string> MakeMaybe (string s) {
+	public static Maybe<string> Maybe (string s) {
 		return s == null || s == "" ? new Nothing<string> () as Maybe<string> : new Just<string> (s) as Maybe<string>;
 	}
 
-	public static Maybe<string> MakeMaybe (string s, Func<string> defaultValue) {
+	public static Maybe<string> Maybe (string s, Func<string> defaultValue) {
 		return s == null || s == "" ? new Just<string> (defaultValue ()) as Maybe<string> : new Just<string> (s) as Maybe<string>;
 	}
 
-	public static Maybe<A> MakeMaybe<A> (A a, Func<A> defaultValue) {
+	public static Maybe<A> Maybe<A> (A a, Func<A> defaultValue) {
 		return Equals (a, default(A)) ? new Just<A> (defaultValue ()) as Maybe<A> : new Just<A> (a) as Maybe<A>;
 	}
 
-	public static Func<A,Maybe<A>> MakeMaybe<A> () {
-		return a => MakeMaybe (a);
+	public static Func<A,Maybe<A>> Maybe<A> () {
+		return a => Maybe (a);
 	}
 
 
@@ -162,7 +162,7 @@ public static partial class Fn {
 
 	//Pure :: a -> Maybe a
 	public static Maybe<A> Pure<A> (TMaybe _, A a) {
-		return MakeMaybe (a);
+		return Maybe (a);
 	}
 
 	//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b

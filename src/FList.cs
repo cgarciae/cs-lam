@@ -27,6 +27,14 @@ public static partial class Fn {
 		return F => FMap (f, F);
 	}
 
+	public static IEnumerable<B> FMap<A,B> (this IEnumerable<A> e, Func<A,B> f) {
+		return FMap (f, e);
+	}
+
+	public static IEnumerable<A> FMap<A> (this IEnumerable<A> e, Action<A> f) {
+		return FMap (f.ToFunc(), e);
+	}
+
 	//Applicative
 	//Pure :: a -> [a]
 	public static IEnumerable<A> Pure<A> (TList _, A a) {

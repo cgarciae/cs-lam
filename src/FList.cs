@@ -197,6 +197,26 @@ public static partial class Fn {
 		return n => e => Take (n, e);
 	}
 
+	// Replicate :: int -> a -> [a]
+	public static IEnumerable<A> Replicate<A> (int n, A a) {
+		return a.Repeat ().Take (n);
+	}
+
+	// Replicate :: int -> (a -> [a])
+	public static Func<A,IEnumerable<A>> Replicate<A> (int n) {
+		return a => Replicate (n, a);
+	}
+
+	// Replicate :: (int -> (a -> [a]))
+	public static Func<int,Func<A,IEnumerable<A>>> Replicate<A> () {
+		return n => a => Replicate (n, a);
+	}
+
+	// Replicate :: int -> a -> [a]
+	public static IEnumerable<A> Replicate<A> (this A a, int n) {
+		return Replicate (n, a);
+	}
+
 	// Drop :: int -> [a] -> [a]
 	public static IEnumerable<A> Drop<A> (int n, IEnumerable<A> e) {
 		return e.Skip (n);
@@ -219,7 +239,7 @@ public static partial class Fn {
 
 	// Slice :: int -> int -> [a] -> [a]
 	public static IEnumerable<A> Slice<A> (int from, int to, IEnumerable<A> e) {
-		return e.Take (to).Skip (from);
+		return e.Take (to).Drop (from);
 	}
 
 	// Slice :: int -> (int -> ([a] -> [a]))
@@ -255,7 +275,7 @@ public static partial class Fn {
 		return Iterate (f, a);
 	}
 
-	public static IEnumerable<A> Cycle<A> (IEnumerable<A> e){
+	public static IEnumerable<A> Cycle<A> (this IEnumerable<A> e){
 		while (true)
 			foreach(var a in e) 
 				yield return a;

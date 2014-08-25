@@ -8,7 +8,13 @@ public static partial class Fn {
 		return x;
 	}
 
+	public static Func<A,A> Id<A> (){
+		return x => x;
+	}
+
 	public static Action DoNothing = () => {};
+	public static IEnumerable EnumerateNothing = Enumerable (DoNothing);
+	public static Action<A> NoAction<A> () {return a => {};}
 	public static Func<bool> False = () => false;
 	public static Func<bool> True = () => true;
 
@@ -254,6 +260,9 @@ public static partial class Fn {
 		//return Curry ((Func<Func<A,B>,Functor<A>,Functor<B>>)FMap<A,B>) (f);
 		return F => FMap (f, F);
 	}
+
+	public static Func<Func<bool>,Func<bool>> Not =
+		cond => () => ! cond ();
 
 }
 

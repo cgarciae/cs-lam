@@ -105,6 +105,7 @@ public class TMaybe {
 	private TMaybe (){}
 }
 
+
 public static partial class Fn {
 
 	public static Just<A> Just<A> (A a) {

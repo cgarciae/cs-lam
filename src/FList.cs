@@ -285,6 +285,12 @@ public static partial class Fn {
 		return e => Cycle (e);
 	}
 
+	public static IEnumerable Cycle (this IEnumerable e){
+		while (true)
+			foreach(var _ in e) 
+				yield return null;
+	}
+
 	//Join :: [a] -> [a] -> [a]
 	public static IEnumerable<A> Join<A> (IEnumerable<A> a, IEnumerable<A> b) {
 		var enuA = a.GetEnumerator ();
@@ -333,17 +339,33 @@ public static partial class Fn {
 		return Join (a, b);
 	}
 
-	public static IEnumerable Then (this IEnumerable a, Action f) {
-		return Join (a, PureEnumeble (f));
+	public static IEnumerable Then<A> (this IEnumerable e, Func<A> f) {
+		return Join (e, Enumerable (f));
 	}
 
-	public static IEnumerable PureEnumeble (Action f) {
+	public static IEnumerable Then (this IEnumerable a, Action f) {
+		return Join (a, Enumerable (f));
+	}
+
+	public static IEnumerable Then<A> (this IEnumerable e, A a) {
+		return Join (e, Enumerable (a));
+	}
+
+	public static IEnumerable<A> Enumerable<A> (Func<A> f) {
+		yield return f();
+	}
+
+	public static IEnumerable Enumerable (Action f) {
 		f ();
 		yield return null;
 	}
 
-	public static Func<Action,IEnumerable> PureEnumeble () {
-		return f => PureEnumeble (f);
+	public static IEnumerable<A> Enumerable<A> (A a) {
+		yield return a;
+	}
+
+	public static Func<Action,IEnumerable> Enumerable () {
+		return f => Enumerable (f);
 	}
 
 }

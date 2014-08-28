@@ -335,20 +335,67 @@ public static partial class Fn {
 		return a => b => Join (a, b);
 	}
 
+	//AppendL :: a -> [a] -> [a]
+	public static IEnumerable<A> AppendL<A> (A a, IEnumerable<A> e) {
+		yield return a;
+
+		foreach (var x in e) {
+			yield return x;	
+		}
+	}
+
+	//AppendL :: a -> ([a] -> [a])
+	public static Func<IEnumerable<A>,IEnumerable<A>> AppendL<A> (A a) {
+		return e => AppendL (a, e);
+	}
+
+	//AppendL :: (a -> ([a] -> [a]))
+	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendL<A> () {
+		return a => e => AppendL (a, e);
+	}
+
+	//AppendR :: a -> [a] -> [a]
+	public static IEnumerable<A> AppendR<A> (A a, IEnumerable<A> e) {
+		
+		foreach (var x in e) {
+			yield return x;	
+		}
+
+		yield return a;
+	}
+	
+	//AppendL :: a -> ([a] -> [a])F
+	public static Func<IEnumerable<A>,IEnumerable<A>> AppendR<A> (A a) {
+		return e => AppendR (a, e);
+	}
+	
+	//AppendL :: (a -> ([a] -> [a]))
+	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendR<A> () {
+		return a => e => AppendR (a, e);
+	}
+
 	public static IEnumerable Then (this IEnumerable a, IEnumerable b) {
 		return Join (a, b);
 	}
 
-	public static IEnumerable Then<A> (this IEnumerable e, Func<A> f) {
-		return Join (e, Enumerable (f));
+	public static IEnumerable Then (this IEnumerable a, Func<IEnumerable> f) {
+		foreach (var _ in a)
+			yield return null;
+
+		foreach (var _ in f())
+			yield return null;
+	}
+
+	public static Seq<A> Then<A> (this IEnumerable e, Func<A> f) {
+		return new Seq<A> (Join (e, Enumerable (f)));
 	}
 
 	public static IEnumerable Then (this IEnumerable a, Action f) {
 		return Join (a, Enumerable (f));
 	}
 
-	public static IEnumerable Then<A> (this IEnumerable e, A a) {
-		return Join (e, Enumerable (a));
+	public static Seq<A> Then<A> (this IEnumerable e, A a) {
+		return new Seq<A> (Join (e, Enumerable (a)));
 	}
 
 	public static IEnumerable<A> Enumerable<A> (Func<A> f) {

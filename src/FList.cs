@@ -378,26 +378,6 @@ public static partial class Fn {
 		return Join (a, b);
 	}
 
-	public static IEnumerable Then (this IEnumerable a, Func<IEnumerable> f) {
-		foreach (var _ in a)
-			yield return null;
-
-		foreach (var _ in f())
-			yield return null;
-	}
-
-	public static Seq<A> Then<A> (this IEnumerable e, Func<A> f) {
-		return new Seq<A> (Join (e, Enumerable (f)));
-	}
-
-	public static IEnumerable Then (this IEnumerable a, Action f) {
-		return Join (a, Enumerable (f));
-	}
-
-	public static Seq<A> Then<A> (this IEnumerable e, A a) {
-		return new Seq<A> (Join (e, Enumerable (a)));
-	}
-
 	public static IEnumerable<A> Enumerable<A> (Func<A> f) {
 		yield return f();
 	}

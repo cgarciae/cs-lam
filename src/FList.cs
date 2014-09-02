@@ -419,6 +419,12 @@ public static partial class Fn {
 		return f => Enumerable (f);
 	}
 
+	public static void Run (this IEnumerable e) {
+		foreach (var _ in e) {
+
+		}
+	}
+
 }
 
 public class TList {

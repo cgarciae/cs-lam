@@ -139,6 +139,30 @@ public static partial class Fn {
 		return ZipWith (f.ToFunc (), ea, eb);  
 	}
 
+	// ZipProd :: (a -> b -> c) -> [a] -> [b] -> [c]
+	public static IEnumerable<C> ZipProd<A,B,C> (Func<A,B,C> f, IEnumerable<A> ea, IEnumerable<B> eb) {
+		foreach (var a in ea) {
+			foreach (var b in eb) {
+				yield return f (a, b);
+			}	
+		}
+	}
+
+	// ZipProd :: (a -> b -> c) -> ([a] -> ([b] -> [c]))
+	public static Func<IEnumerable<A>,Func<IEnumerable<B>,IEnumerable<C>>> ZipProd<A,B,C> (Func<A,B,C> f) {
+		return ea => eb => ZipProd (f, ea, eb);
+	}
+	
+	// ZipProd :: ((a -> b -> c) -> ([a] -> ([b] -> [c])))
+	public static Func<Func<A,B,C>,Func<IEnumerable<A>,Func<IEnumerable<B>,IEnumerable<C>>>> ZipProd<A,B,C> () {
+		return f => ea => eb => ZipProd (f, ea, eb);
+	}
+	
+	// ZipProd :: (a -> b -> void) -> [a] -> [b] -> [b]
+	public static IEnumerable<B> ZipProd<A,B> (Action<A,B> f, IEnumerable<A> ea, IEnumerable<B> eb) {
+		return ZipProd (f.ToFunc (), ea, eb);  
+	}
+
 	// ScanL :: :: (a -> a -> a) -> [a] -> [a]
 	public static IEnumerable<A> ScanL1<A> (Func<A,A,A> f, IEnumerable<A> e) {
 		A a;

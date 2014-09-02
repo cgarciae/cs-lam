@@ -44,6 +44,18 @@ public static partial class Fn {
 		};
 	}
 
+	public static Action<A> ToAction<A,B> (this Func<A,B> f) {
+		return a => f (a);
+	}
+
+	public static Action<A,B> ToAction<A,B,C> (this Func<A,B,C> f) {
+		return (a, b) => f (a, b);
+	}
+
+	public static Action<A,B,C> ToAction<A,B,C,D> (this Func<A,B,C,D> f) {
+		return (a, b, c) => f (a, b, c);
+	}
+
 	//COMPOSE Func :: (b -> c) -> (a -> b) -> (a -> c)
 	public static Func<A,C> Compose<A,B,C> ( Func<B,C> g, Func<A,B> f ) {
 		return x => g (f (x));

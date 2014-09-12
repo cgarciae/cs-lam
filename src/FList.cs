@@ -114,6 +114,29 @@ public static partial class Fn {
 		return f => a => e => FoldL (f, a, e);
 	}
 
+	// FoldL1 :: (a -> a -> a) -> [a] -> a
+	public static A FoldL1<A> (Func<A,A,A> f, IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+		enu.MoveNext ();
+		var acc = enu.Current;
+
+		while (enu.MoveNext()) {
+			acc = f (acc, enu.Current);	
+		}
+
+		return acc;
+	}
+
+	// FoldL1 :: (a -> a -> a) -> [a] -> a
+	public static Func<IEnumerable<A>,A> FoldL1<A> (Func<A,A,A> f) {
+		return e => FoldL1 (f, e);
+	}
+
+	// FoldL1 :: (a -> a -> a) -> [a] -> a
+	public static Func<Func<A,A,A>,Func<IEnumerable<A>,A>> FoldL1<A> () {
+		return f => e => FoldL1 (f, e);
+	}
+
 	// ZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
 	public static IEnumerable<C> ZipWith<A,B,C> (Func<A,B,C> f, IEnumerable<A> ea, IEnumerable<B> eb) {
 		var a = ea.GetEnumerator ();
@@ -357,6 +380,26 @@ public static partial class Fn {
 	//Join :: [a] -> [a] -> [a]
 	public static Func<IEnumerable,Func<IEnumerable,IEnumerable>> Join () {
 		return a => b => Join (a, b);
+	}
+
+	//Concat :: [[a]] -> [a]
+	public static IEnumerable<A> Concat<A> (this IEnumerable<IEnumerable<A>> listOfLists) {
+		return FoldL1 (Join<A> ().Uncurry (), listOfLists);
+	}
+
+	//Concat :: [[a]] -> [a]
+	public static Func<IEnumerable<IEnumerable<A>>,IEnumerable<A>> Concat<A> () {
+		return listOfLists => FoldL1 (Join<A> ().Uncurry (), listOfLists);
+	}
+
+	//Concat :: [[object]] -> [object]
+	public static IEnumerable Concat (this IEnumerable<IEnumerable> listOfLists) {
+		return FoldL1 (Join ().Uncurry (), listOfLists);
+	}
+	
+	//Concat :: [[object]] -> [object]
+	public static Func<IEnumerable<IEnumerable>,IEnumerable> Concat () {
+		return listOfLists => FoldL1 (Join ().Uncurry (), listOfLists);
 	}
 
 	//AppendL :: a -> [a] -> [a]

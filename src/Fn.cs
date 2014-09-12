@@ -251,6 +251,19 @@ public static partial class Fn {
 		return a => b => c => d => f (a, b, c, d);
 	}
 
+	//Uncurry :: (a -> b -> c) -> (a -> (b -> c))
+	public static Func<A,B,C> Uncurry<A,B,C> (this Func<A,Func<B,C>> f) {
+		return (a, b) => f (a) (b);
+	}
+	
+	public static Func<A,B,C,D> Uncurry<A,B,C,D> (this Func<A,Func<B,Func<C,D>>> f) {
+		return (a, b, c) => f (a) (b) (c);
+	}
+	
+	public static Func<A,B,C,D,E> Uncurry<A,B,C,D,E> (this Func<A,Func<B,Func<C,Func<D,E>>>> f) {
+		return (a, b, c, d) => f (a) (b) (c) (d);
+	}
+
 	//FMap :: (a -> b) -> F a -> F b
 	public static Functor <B> FMap<A,B> (Func<A,B> f, Functor <A> F) {
 		return F.FMap (f);

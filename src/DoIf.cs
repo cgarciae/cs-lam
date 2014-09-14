@@ -13,8 +13,8 @@ public abstract class DoIf<A> : Functor<A> {
 		}
 	}
 
-	public abstract DoIf<B> MapR<B> (Func<A,B> f);
-	public abstract DoIf<A> MapR (Action<A> f);
+	public abstract DoIf<B> FMap<B> (Func<A,B> f);
+	public abstract DoIf<A> FMap (Action<A> f);
 	public abstract DoIf<A> Do (Func<A> f);
 	public abstract DoIf<A> Try ();
 	public abstract DoIf<A> If (Func<bool> cond);
@@ -84,12 +84,12 @@ public class Waiting<A> : DoIf<A> {
 		return Try ();
 	}
 
-	public override DoIf<B> MapR<B> (Func<A, B> f)
+	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
 		return new Waiting<B> (() => f (fa ()), condition, guard).Try ();
 	}
 
-	public override DoIf<A> MapR (Action<A> f)
+	public override DoIf<A> FMap (Action<A> f)
 	{
 		return new Waiting<A> (() => f.ToFunc () (fa ()), condition, guard).Try();
 	}
@@ -141,14 +141,14 @@ public class Done<A> : DoIf<A> {
 		this.guard = guard;
 	}
 
-	public override DoIf<B> MapR<B> (Func<A, B> f)
+	public override DoIf<B> FMap<B> (Func<A, B> f)
 	{
-		return new Waiting<A> (() => a, condition, guard).MapR (f).Try();
+		return new Waiting<A> (() => a, condition, guard).FMap (f).Try();
 	}
 
-	public override DoIf<A> MapR (Action<A> f)
+	public override DoIf<A> FMap (Action<A> f)
 	{
-		return MapR (f.ToFunc ());
+		return FMap (f.ToFunc ());
 	}
 
 	public override DoIf<A> Do (Func<A> f) {

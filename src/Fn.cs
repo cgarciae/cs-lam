@@ -297,5 +297,9 @@ public interface Functor<A> {
 }
 
 public interface Applicative<A> : Functor<A> {
-	Functor<A> Pure (A a);
+	Functor<A> Pure (A value);
+}
+
+public interface Monad<A> : Applicative<A> {
+	Monad<B> Bind<B> (Func<A,Monad<B>> f);
 }

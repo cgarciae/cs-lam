@@ -2,12 +2,13 @@ using UnityEngine;
 using System;
 using System.Collections;
 
-public abstract class Maybe <A> : Applicative<A> {
+public abstract class Maybe <A> : Monad<A> {
 
 	public abstract bool IsNothing {get;}
 	public abstract A value {get;}
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
 	public abstract Maybe<A> FMap (Action<A> f);
+	public abstract Maybe<B> Bind<B> (Func<A,Maybe<B>> f);
 
 	public Maybe<A> Pure (A a) {
 		return Fn.Maybe (a);
@@ -33,6 +34,14 @@ public abstract class Maybe <A> : Applicative<A> {
 
 	public static bool operator ! (Maybe<A> m) {
 		return m.IsNothing;
+	}
+
+	Monad<B> Monad<A>.Bind<B> (Func<A, Monad<B>> f)
+	{
+		if (IsNothing)
+			return Fn.Nothing<B>();
+		else
+			return f (value);
 	}
 }
 
@@ -67,6 +76,11 @@ public class Just<A> : Maybe<A> {
 		}
 	}
 
+	public override Maybe<B> Bind<B> (Func<A, Maybe<B>> f)
+	{
+		return f (val);
+	}
+
 }
 
 public class Nothing<A> : Maybe<A> {
@@ -91,6 +105,11 @@ public class Nothing<A> : Maybe<A> {
 		get {
 			return default (A);
 		}
+	}
+
+	public override Maybe<B> Bind<B> (Func<A, Maybe<B>> f)
+	{
+		return this;
 	}
 }
 
@@ -211,5 +230,23 @@ public static partial class Fn {
 	public static Func<Maybe<Action<A>>,Maybe<A>> Apply<A> (TMaybe _, Maybe<A> m) {
 		return mf => mf ? new Nothing<A>() : m.FMap (mf.value);
 	}
+
+	//MONAD
+
+	// Bind :: (a -> Maybe b) -> Maybe a -> Maybe b
+	public static Maybe<B> Bind<A,B> (Func<A,Maybe<B>> f, Maybe<A> m) {
+		return m.Bind (f);
+	}
+
+	// Bind :: (a -> Maybe b) -> Maybe a -> Maybe b
+	public static Func<Maybe<A>,Maybe<B>> Bind<A,B> (Func<A,Maybe<B>> f) {
+		return m => Bind(f, m);
+	}
+
+	// Bind :: (a -> Maybe b) -> Maybe a -> Maybe b
+	public static Func<Func<A,Maybe<B>>,Func<Maybe<A>,Maybe<B>>> Bind<A,B> () {
+		return f => m => Bind(f, m);
+	}
+
 
 }

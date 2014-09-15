@@ -217,27 +217,6 @@ public static partial class Fn {
 		return (f) .Of (g);
 	}
 
-	//THEN
-	public static Func<A,C> Then<A,B,C> (this Func<A,B> f, Func<B,C> g) {
-		return g.Of (f);	
-	}
-	
-	public static Func<A,B> Then<A,B> (this Func<A,B> f, Action<B> g) {
-		return g.Of (f);	
-	}
-	
-	public static Func<A,B> Then<A,B> (this Action<A> f, Func<A,B> g) {
-		return g.Of (f);
-	}
-	
-	public static Action<A> Then<A> (this Action<A> f, Action<A> g) {
-		return g.Of (f);
-	}
-	
-	public static Action Then (this Action f, Action g) {
-		return (g) .o (f);
-	}
-
 	//Curry :: (a -> b -> c) -> (a -> (b -> c))
 	public static Func<A,Func<B,C>> Curry<A,B,C> (this Func<A,B,C> f) {
 		return a => b => f (a, b);

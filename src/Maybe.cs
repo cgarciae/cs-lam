@@ -7,8 +7,17 @@ public abstract class Maybe <A> : Monad<A> {
 	public abstract bool IsNothing {get;}
 	public abstract A value {get;}
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
-	public abstract Maybe<A> FMap (Action<A> f);
 	public abstract Maybe<B> Bind<B> (Func<A,Maybe<B>> f);
+
+	public abstract Either<B,A> ToEither<B> ();
+
+	public Maybe<A> FMap (Action<A> f) {
+		return FMap (f.ToFunc ());
+	}
+
+	public Maybe<A> FMap (Action f) {
+		return FMap (f.ToFunc<A> ());
+	}
 
 	public Maybe<A> Pure (A a) {
 		return Fn.Maybe (a);
@@ -58,12 +67,6 @@ public class Just<A> : Maybe<A> {
 		return Fn.Maybe (f (val));
 	}
 	
-	public override Maybe<A> FMap (Action<A> f)
-	{
-		f (val);
-		return this;
-	}
-	
 	public override bool IsNothing {
 		get {
 			return false;
@@ -81,18 +84,19 @@ public class Just<A> : Maybe<A> {
 		return f (val);
 	}
 
+	public override Either<B, A> ToEither<B> ()
+	{
+		return Fn.MaybeRight<B, A> (val);
+	}
+
 }
 
 public class Nothing<A> : Maybe<A> {
 
 	public override Maybe<B> FMap<B> (Func<A, B> f)
 	{
+		Debug.Log ("Nothing Happened");
 		return new Nothing<B> ();
-	}
-
-	public override Maybe<A> FMap (Action<A> f)
-	{
-		return this;
 	}
 
 	public override bool IsNothing {
@@ -110,6 +114,11 @@ public class Nothing<A> : Maybe<A> {
 	public override Maybe<B> Bind<B> (Func<A, Maybe<B>> f)
 	{
 		return this;
+	}
+
+	public override Either<B, A> ToEither<B> ()
+	{
+		return new Neither<B, A> ();
 	}
 }
 
@@ -136,7 +145,12 @@ public static partial class Fn {
 	}
 
 	public static Maybe<A> Maybe<A> (A a) {
-		return Equals (a, default(A)) ? new Nothing<A> () as Maybe<A> : new Just<A> (a) as Maybe<A>;
+		if (a == null) {
+			Debug.Log ("Maybe Failed");
+			return new Nothing<A> ();
+		}
+		else
+			return new Just<A> (a);
 	}
 
 	public static Maybe<string> Maybe (string s) {
@@ -246,6 +260,11 @@ public static partial class Fn {
 	// Bind :: (a -> Maybe b) -> Maybe a -> Maybe b
 	public static Func<Func<A,Maybe<B>>,Func<Maybe<A>,Maybe<B>>> Bind<A,B> () {
 		return f => m => Bind(f, m);
+	}
+
+	//Utility
+	public static Maybe<A> Flatten<A> (this Maybe<Maybe<A>> m) {
+		return m.IsNothing ? new Nothing<A>() : m.value;
 	}
 
 

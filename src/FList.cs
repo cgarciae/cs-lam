@@ -430,13 +430,31 @@ public static partial class Fn {
 
 		yield return a;
 	}
-	
-	//AppendL :: a -> ([a] -> [a])F
+
+	//AppendR :: obj -> [obj] -> [obj]
+	public static IEnumerable AppendR<A> (this A value, IEnumerable e) {
+		foreach (var x in e) {
+			yield return x;	
+		}
+		
+		yield return value;
+	}
+
+	//AppendR :: obj -> [obj] -> [obj]
+	public static IEnumerable AppendR<A> (this Func<A> f, IEnumerable e) {
+		foreach (var x in e) {
+			yield return x;	
+		}
+		
+		yield return f();
+	}
+
+	//AppendR :: a -> ([a] -> [a])F
 	public static Func<IEnumerable<A>,IEnumerable<A>> AppendR<A> (A a) {
 		return e => AppendR (a, e);
 	}
 	
-	//AppendL :: (a -> ([a] -> [a]))
+	//AppendR :: (a -> ([a] -> [a]))
 	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendR<A> () {
 		return a => e => AppendR (a, e);
 	}

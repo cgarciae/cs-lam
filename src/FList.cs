@@ -250,8 +250,32 @@ public static partial class Fn {
 	}
 
 	// Take :: (int -> ([a] -> [a]))
-	public static Func<int,Func<IEnumerable<A>,IEnumerable<A>>> Take<A> () {
-		return n => e => Take (n, e);
+	public static Func<int,IEnumerable<A>,IEnumerable<A>> Take<A> () {
+		return (n, e) => Take (n, e);
+	}
+
+	// TakeWhile :: (a -> bool) -> [a] -> [a]
+	public static IEnumerable<A> TakeWhile<A> (Func<A,bool> f, IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+
+		while (enu.MoveNext() && f (enu.Current)) {
+			yield return enu.Current;
+		}
+	}
+
+	// TakeWhile :: (a -> bool) -> [a] -> [a]
+	public static Func<IEnumerable<A>,IEnumerable<A>> TakeWhile<A> (Func<A,bool> f) {
+		return e => TakeWhile (f, e);
+	}
+
+	// TakeWhile :: (a -> bool) -> [a] -> [a]
+	public static Func<Func<A,bool>,IEnumerable<A>,IEnumerable<A>> TakeWhile<A> () {
+		return (f, e) => TakeWhile (f, e);
+	}
+
+	// TakeWhile :: (a -> bool) -> [a] -> [a]
+	public static IEnumerable<A> TakeWhile<A> (this IEnumerable<A> e, Func<A,bool> f) {
+		return TakeWhile (f, e);
 	}
 
 	// Replicate :: int -> a -> [a]
@@ -330,6 +354,26 @@ public static partial class Fn {
 	// a.Iterate :: (a -> a) -> [a]
 	public static IEnumerable<A> Iterate<A> (this A a, Func<A,A> f) {
 		return Iterate (f, a);
+	}
+
+	// IterateWhile :: (a -> bool) -> (a -> a) -> a -> [a]
+	public static IEnumerable<A> IterateWhile<A> (Func<A,bool> cond, Func<A,A> f, A a) {
+		return TakeWhile (cond, Iterate (f, a));
+	}
+
+	// IterateWhile :: (a -> bool) -> (a -> a) -> a -> [a]
+	public static Func<Func<A,A>, A, IEnumerable<A>> IterateWhile<A> (Func<A,bool> cond) {
+		return (f, a) => TakeWhile (cond, Iterate (f, a));
+	}
+
+	// IterateWhile :: (a -> bool) -> (a -> a) -> a -> [a]
+	public static Func<Func<A,bool> ,Func<A,A>, A, IEnumerable<A>> IterateWhile<A> () {
+		return (cond, f, a) => TakeWhile (cond, Iterate (f, a));
+	}
+
+	// IterateWhile :: (a -> bool) -> (a -> a) -> a -> [a]
+	public static IEnumerable<A> IterateWhile<A> (this A a, Func<A,bool> cond, Func<A,A> f) {
+		return TakeWhile (cond, Iterate (f, a));
 	}
 
 	public static IEnumerable<A> Cycle<A> (this IEnumerable<A> e){

@@ -114,6 +114,11 @@ public static partial class Fn {
 		return f => a => e => FoldL (f, a, e);
 	}
 
+	// FoldL :: (a -> b -> a) -> a -> [b] -> a
+	public static A FoldL<A,B> (this IEnumerable<B> e, A a, Func<A,B,A> f) {
+		return FoldL (f, a, e);
+	}
+
 	// FoldL1 :: (a -> a -> a) -> [a] -> a
 	public static A FoldL1<A> (Func<A,A,A> f, IEnumerable<A> e) {
 		var enu = e.GetEnumerator ();
@@ -135,6 +140,11 @@ public static partial class Fn {
 	// FoldL1 :: (a -> a -> a) -> [a] -> a
 	public static Func<Func<A,A,A>,Func<IEnumerable<A>,A>> FoldL1<A> () {
 		return f => e => FoldL1 (f, e);
+	}
+
+	// FoldL1 :: (a -> a -> a) -> [a] -> a
+	public static A FoldL1<A> (this IEnumerable<A> e, Func<A,A,A> f) {
+		return FoldL1 (f, e);
 	}
 
 	// ZipWith :: (a -> b -> c) -> [a] -> [b] -> [c]

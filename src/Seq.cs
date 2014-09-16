@@ -108,6 +108,10 @@ public static partial class Fn {
 		return new Seq<A> (Ex._Do(f));
 	}
 
+	public static Seq<A> Seq<A> (IEnumerable<A> e) {
+		return new Seq<A> (e);
+	}
+
 	public static Seq<A> Seq<A> (IEnumerable e) {
 		return new Seq<A> (e);
 	}

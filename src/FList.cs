@@ -84,6 +84,26 @@ public static partial class Fn {
 		return Map (f, e);
 	}
 
+	//Filter :: (a -> bool) -> [a] -> [a]
+	public static IEnumerable<A> Filter<A> (Func<A,bool> cond, IEnumerable<A> e) {
+		return e.Where (cond);
+	}
+
+	//Filter :: (a -> bool) -> [a] -> [a]
+	public static Func<IEnumerable<A>,IEnumerable<A>> Filter<A> (Func<A,bool> cond) {
+		return e => Filter (cond, e);
+	}
+
+	//Filter :: (a -> bool) -> [a] -> [a]
+	public static Func <Func<A,bool>, IEnumerable<A>, IEnumerable<A>> Filter<A> () {
+		return (cond, e) => Filter (cond, e);
+	}
+
+	//Filter :: (a -> bool) -> [a] -> [a]
+	public static IEnumerable<A> Filter<A> (this IEnumerable<A> e, Func<A,bool> cond) {
+		return e.Where (cond);
+	}
+
 	// Reverse :: [a] -> [a]
 	public static IEnumerable<A> Reverse<A> (IEnumerable<A> e) {
 		return e.Reverse ();
@@ -511,6 +531,28 @@ public static partial class Fn {
 	//AppendR :: (a -> ([a] -> [a]))
 	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendR<A> () {
 		return a => e => AppendR (a, e);
+	}
+
+	//Head :: [a] -> a
+	public static A Head<A> (this IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+		enu.MoveNext ();
+		return enu.Current;
+	}
+
+	//Head :: [a] -> a
+	public static Func <IEnumerable<A>, A> Head<A> () {
+		return e => e.Head ();
+	}
+
+	//MaybeHead :: [a] -> Maybe a
+	public static Maybe<A> MaybeHead<A> (this IEnumerable<A> e) {
+		return Fn.Maybe (e.Head ());
+	}
+
+	//MaybeHead :: [a] -> Maybe a
+	public static Func <IEnumerable<A>, Maybe<A>> MaybeHead<A> () {
+		return e => MaybeHead (e);
 	}
 
 	public static IEnumerable Then (this IEnumerable a, IEnumerable b) {

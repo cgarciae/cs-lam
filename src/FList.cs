@@ -579,6 +579,7 @@ public static partial class Fn {
 	//MaybeHead :: [a] -> Maybe a
 	public static Maybe<A> MaybeHead<A> (this IEnumerable<A> e) {
 		var enu = e.GetEnumerator ();
+
 		if (enu.MoveNext ())
 			return Fn.Maybe (enu.Current);
 		else

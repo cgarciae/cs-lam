@@ -95,7 +95,6 @@ public class Nothing<A> : Maybe<A> {
 
 	public override Maybe<B> FMap<B> (Func<A, B> f)
 	{
-		Debug.Log ("Nothing Happened");
 		return new Nothing<B> ();
 	}
 

@@ -45,6 +45,37 @@ public static partial class Fn {
 	public static IEnumerable<A> Pure<A> (this IEnumerable<A> l, A a) {
 		return Fn.Repeat (a);
 	}
+
+	// Apply [a -> b] -> [a] -> [b]
+	public static IEnumerable<B> Apply<A,B> (this IEnumerable<Func<A,B>> ef, IEnumerable<A> e) {
+		foreach (var f in ef) {
+			foreach (var a in e) {
+				yield return f (a);
+			}	
+		}
+	}
+
+	// Apply [a -> b] -> [a] -> [b]
+	public static Func <IEnumerable<A>, IEnumerable<B>> Apply<A,B> (this IEnumerable<Func<A,B>> ef) {
+		return e => ef.Apply (e);
+	}
+	
+	//Monda
+
+	//Bind :: (a -> [b]) -> [a] -> [b]
+	public static IEnumerable<B> Bind<A,B> (Func <A, IEnumerable<B>> f, IEnumerable<A> e) {
+		return Concat (FMap (f, e));
+	}
+
+	//Bind :: (a -> [b]) -> [a] -> [b]
+	public static Func <IEnumerable<A>, IEnumerable<B>> Bind<A,B> (Func <A, IEnumerable<B>> f) {
+		return e => Bind (f, e);
+	}
+
+	//Bind :: (a -> [b]) -> [a] -> [b]
+	public static IEnumerable<B> Bind<A,B> (this IEnumerable<A> e, Func <A, IEnumerable<B>> f) {
+		return Bind (f, e);
+	}
 }
 
 public static partial class Fn {
@@ -547,7 +578,11 @@ public static partial class Fn {
 
 	//MaybeHead :: [a] -> Maybe a
 	public static Maybe<A> MaybeHead<A> (this IEnumerable<A> e) {
-		return Fn.Maybe (e.Head ());
+		var enu = e.GetEnumerator ();
+		if (enu.MoveNext ())
+			return Fn.Maybe (enu.Current);
+		else
+			return Fn.Nothing<A> ();
 	}
 
 	//MaybeHead :: [a] -> Maybe a

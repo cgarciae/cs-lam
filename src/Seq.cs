@@ -83,7 +83,7 @@ public class Seq<A> : IEnumerable, Monad<A> {
 
 	public Functor<A> Pure (A value)
 	{
-		throw new NotImplementedException ();
+		return new Seq<A> (value);
 	}
 
 	Functor<B> Functor<A>.FMap<B> (Func<A, B> f)

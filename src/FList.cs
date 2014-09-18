@@ -444,7 +444,7 @@ public static partial class Fn {
 	}
 
 	//Join :: [a] -> [a] -> [a]
-	public static IEnumerable<A> Join<A> (IEnumerable<A> a, IEnumerable<A> b) {
+	public static IEnumerable<A> Join<A> (this IEnumerable<A> a, IEnumerable<A> b) {
 		var enuA = a.GetEnumerator ();
 		var enuB = b.GetEnumerator ();
 
@@ -456,7 +456,7 @@ public static partial class Fn {
 	}
 
 	//Join :: [a] -> [a] -> [a]
-	public static Func<IEnumerable<A>,IEnumerable<A>> Join<A> (IEnumerable<A> a) {
+	public static Func<IEnumerable<A>,IEnumerable<A>> Join<A> (this IEnumerable<A> a) {
 		return b => Join (a, b);
 	}
 
@@ -508,7 +508,7 @@ public static partial class Fn {
 	}
 
 	//AppendL :: a -> [a] -> [a]
-	public static IEnumerable<A> AppendL<A> (A a, IEnumerable<A> e) {
+	public static IEnumerable<A> AppendL<A> (this A a, IEnumerable<A> e) {
 		yield return a;
 
 		foreach (var x in e) {
@@ -517,7 +517,7 @@ public static partial class Fn {
 	}
 
 	//AppendL :: a -> ([a] -> [a])
-	public static Func<IEnumerable<A>,IEnumerable<A>> AppendL<A> (A a) {
+	public static Func<IEnumerable<A>,IEnumerable<A>> AppendL<A> (this A a) {
 		return e => AppendL (a, e);
 	}
 
@@ -527,7 +527,7 @@ public static partial class Fn {
 	}
 
 	//AppendR :: a -> [a] -> [a]
-	public static IEnumerable<A> AppendR<A> (A a, IEnumerable<A> e) {
+	public static IEnumerable<A> AppendR<A> (this A a, IEnumerable<A> e) {
 		
 		foreach (var x in e) {
 			yield return x;	
@@ -536,7 +536,17 @@ public static partial class Fn {
 		yield return a;
 	}
 
-	//AppendR :: obj -> [obj] -> [obj]
+	//AppendR :: a -> ([a] -> [a])F
+	public static Func<IEnumerable<A>,IEnumerable<A>> AppendR<A> (this A a) {
+		return e => AppendR (a, e);
+	}
+	
+	//AppendR :: (a -> ([a] -> [a]))
+	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendR<A> () {
+		return a => e => AppendR (a, e);
+	}
+
+	//AppendR :: a -> [obj] -> [obj]
 	public static IEnumerable AppendR<A> (this A value, IEnumerable e) {
 		foreach (var x in e) {
 			yield return x;	
@@ -544,7 +554,7 @@ public static partial class Fn {
 		
 		yield return value;
 	}
-
+	
 	//AppendR :: obj -> [obj] -> [obj]
 	public static IEnumerable AppendR<A> (this Func<A> f, IEnumerable e) {
 		foreach (var x in e) {
@@ -554,14 +564,12 @@ public static partial class Fn {
 		yield return f();
 	}
 
-	//AppendR :: a -> ([a] -> [a])F
-	public static Func<IEnumerable<A>,IEnumerable<A>> AppendR<A> (A a) {
-		return e => AppendR (a, e);
+	public static IEnumerable<A> Append<A> (this IEnumerable<A> e, A a) {
+		return AppendR (a, e);
 	}
-	
-	//AppendR :: (a -> ([a] -> [a]))
-	public static Func<A,Func<IEnumerable<A>,IEnumerable<A>>> AppendR<A> () {
-		return a => e => AppendR (a, e);
+
+	public static Func <A, IEnumerable<A>> Append<A> (this IEnumerable<A> e) {
+		return a => AppendR (a, e);
 	}
 
 	//Head :: [a] -> a

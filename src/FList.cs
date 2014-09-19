@@ -228,6 +228,11 @@ public static partial class Fn {
 		return ZipWith (f, ea, eb);
 	}
 
+	// ZipWith :: [a] -> [b] -> (a -> b -> c) -> [c]
+	public static IEnumerable<B> ZipWith<A,B> (this IEnumerable<A> ea, IEnumerable<B> eb, Action<A,B> f) {
+		return ZipWith (f.ToFunc(), ea, eb);
+	}
+
 	// ZipProd :: (a -> b -> c) -> [a] -> [b] -> [c]
 	public static IEnumerable<C> ZipProd<A,B,C> (Func<A,B,C> f, IEnumerable<A> ea, IEnumerable<B> eb) {
 		foreach (var a in ea) {

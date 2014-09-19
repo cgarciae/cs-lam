@@ -223,6 +223,11 @@ public static partial class Fn {
 		return ZipWith (f.ToFunc (), ea, eb);  
 	}
 
+	// ZipWith :: [a] -> [b] -> (a -> b -> c) -> [c]
+	public static IEnumerable<C> ZipWith<A,B,C> (this IEnumerable<A> ea, IEnumerable<B> eb, Func<A,B,C> f) {
+		return ZipWith (f, ea, eb);
+	}
+
 	// ZipProd :: (a -> b -> c) -> [a] -> [b] -> [c]
 	public static IEnumerable<C> ZipProd<A,B,C> (Func<A,B,C> f, IEnumerable<A> ea, IEnumerable<B> eb) {
 		foreach (var a in ea) {
@@ -597,6 +602,40 @@ public static partial class Fn {
 	//MaybeHead :: [a] -> Maybe a
 	public static Func <IEnumerable<A>, Maybe<A>> MaybeHead<A> () {
 		return e => MaybeHead (e);
+	}
+
+	//LAST
+	//Last :: [a] -> a
+	public static A Last<A> (this IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+
+		while (enu.MoveNext ()) {}
+
+		return enu.Current;
+	}
+	
+	//Last :: [a] -> a
+	public static Func <IEnumerable<A>, A> Last<A> () {
+		return e => e.Last ();
+	}
+	
+	//MaybeLast :: [a] -> Maybe a
+	public static Maybe<A> MaybeLast<A> (this IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+		
+		if (enu.MoveNext ()) {
+			while (enu.MoveNext ()) {
+
+			}
+			return Fn.Maybe (enu.Current);
+		}
+		else
+			return Fn.Nothing<A> ();
+	}
+	
+	//MaybeLast :: [a] -> Maybe a
+	public static Func <IEnumerable<A>, Maybe<A>> MaybeLast<A> () {
+		return e => MaybeLast (e);
 	}
 
 	public static IEnumerable Then (this IEnumerable a, IEnumerable b) {

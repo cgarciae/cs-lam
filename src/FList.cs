@@ -339,6 +339,29 @@ public static partial class Fn {
 		return TakeWhile (f, e);
 	}
 
+	// TakeWhile :: (a -> bool) -> [a] -> [a]
+	public static IEnumerable<A> TakeWhile<A> (Func<A,bool> f, IEnumerator<A> enu) {
+		
+		while (enu.MoveNext() && f (enu.Current)) {
+			yield return enu.Current;
+		}
+	}
+
+	public static IEnumerable<IEnumerable<A>> SplitWhen<A> (Func<A,bool> f, IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+		var l = new LinkedList<A> ();
+
+		while (enu.MoveNext()) {
+			if (f (enu.Current)) {
+				yield return l;
+				l.Clear();
+			}
+			else {
+				l.AddLast (enu.Current);
+			}
+		}
+	}
+
 	// Replicate :: int -> a -> [a]
 	public static IEnumerable<A> Replicate<A> (int n, A a) {
 		return a.Repeat ().Take (n);
@@ -613,10 +636,13 @@ public static partial class Fn {
 	//Last :: [a] -> a
 	public static A Last<A> (this IEnumerable<A> e) {
 		var enu = e.GetEnumerator ();
+		A last = default (A);
 
-		while (enu.MoveNext ()) {}
+		while (enu.MoveNext ()) {
+			last = enu.Current;
+		}
 
-		return enu.Current;
+		return last;
 	}
 	
 	//Last :: [a] -> a
@@ -647,21 +673,47 @@ public static partial class Fn {
 		return Join (a, b);
 	}
 
-	public static IEnumerable<A> Enumerable<A> (Func<A> f) {
+	public static IEnumerable<A> Enumerate<A> (Func<A> f) {
 		yield return f();
 	}
 
-	public static IEnumerable Enumerable (Action f) {
+	public static IEnumerable<A> Enumerate<A> (Func<IEnumerable<A>> f) {
+		var enu = f().GetEnumerator();
+		
+		while (enu.MoveNext()) {
+			yield return enu.Current;
+		}
+	}
+
+	public static IEnumerable Enumerate<A> (Func<Seq<A>> f) {
+		var enu = f().GetEnumerator();
+		
+		while (enu.MoveNext()) {
+			yield return enu.Current;	
+		}
+	}
+
+	public static IEnumerable Enumerate (Func<IEnumerable> f) {
+		IEnumerable e = f ();
+		var enu = e.GetEnumerator();
+		
+		while (enu.MoveNext()) {
+			yield return enu.Current;	
+		}
+	}
+
+
+	public static IEnumerable Enumerate (Action f) {
 		f ();
 		yield return null;
 	}
 
-	public static IEnumerable<A> Enumerable<A> (A a) {
+	public static IEnumerable<A> Enumerate<A> (A a) {
 		yield return a;
 	}
 
-	public static Func<Action,IEnumerable> Enumerable () {
-		return f => Enumerable (f);
+	public static Func<Action,IEnumerable> Enumerate () {
+		return f => Enumerate (f);
 	}
 
 	public static void Run (this IEnumerable e) {

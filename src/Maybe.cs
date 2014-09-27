@@ -144,11 +144,11 @@ public class TMaybe {
 
 public static partial class Fn {
 
-	public static Just<A> Just<A> (A a) {
+	public static Maybe<A> Just<A> (A a) {
 		return new Just<A> (a);
 	}
 	
-	public static Nothing<A> Nothing<A> () {
+	public static Maybe<A> Nothing<A> () {
 		return new Nothing<A> ();
 	}
 
@@ -273,6 +273,10 @@ public static partial class Fn {
 	//Utility
 	public static Maybe<A> Flatten<A> (this Maybe<Maybe<A>> m) {
 		return m.IsNothing ? new Nothing<A>() : m.value;
+	}
+
+	public static Seq<Maybe<A>> Flatten<A> (this Seq<Maybe<Maybe<A>>> s) {
+		return s.FMap ((Maybe<Maybe<A>> m) =>  Flatten (m));
 	}
 
 

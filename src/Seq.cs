@@ -6,14 +6,14 @@ using System.Collections.Generic;
 
 public class Seq<A> : IEnumerable, Monad<A> {
 
-	IEnumerable e = Fn.Enumerable (Fn.DoNothing);
+	IEnumerable e = Fn.Enumerate (Fn.DoNothing);
 
 	public Seq (IEnumerable<A> seq) {
 		this.e = seq;
 	}
 
 	public Seq (A a) {
-		this.e = Fn.Enumerable (a);
+		this.e = Fn.Enumerate (a);
 	}
 	
 	public Seq (IEnumerable seq) {
@@ -105,11 +105,15 @@ public static partial class Fn {
 	}
 
 	public static Seq<A> Seq<A> (Func<A> f) {
-		return new Seq<A> (Ex._Do(f));
+		return new Seq<A> (Fn.Enumerate(f));
 	}
 
 	public static Seq<A> Seq<A> (IEnumerable<A> e) {
 		return new Seq<A> (e);
+	}
+
+	public static Seq<A> Seq<A> (Func<IEnumerable<A>> f) {
+		return new Seq<A> (Fn.Enumerate (f));
 	}
 
 	public static Seq<A> Seq<A> (IEnumerable e) {

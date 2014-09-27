@@ -13,7 +13,7 @@ public static partial class Fn {
 	}
 
 	public static Action DoNothing = () => {};
-	public static IEnumerable EnumerateNothing = Enumerable (DoNothing);
+	public static IEnumerable EnumerateNothing = Enumerate (DoNothing);
 	public static Action<A> NoAction<A> () {return a => {};}
 	public static Func<bool> False = () => false;
 	public static Func<bool> True = () => true;
@@ -231,6 +231,19 @@ public static partial class Fn {
 	}
 
 	public static Func<A,Func<B,Func<C,Func<D,E>>>> Curry<A,B,C,D,E> (this Func<A,B,C,D,E> f) {
+		return a => b => c => d => f (a, b, c, d);
+	}
+
+	//Curry :: (a -> b -> void) -> (a -> (b -> void))
+	public static Func<A,Action<B>> Curry<A,B> (this Action<A,B> f) {
+		return a => b => f (a, b);
+	}
+	
+	public static Func<A,Func<B,Action<C>>> Curry<A,B,C> (this Action<A,B,C> f) {
+		return a => b => c => f (a, b, c);
+	}
+	
+	public static Func<A,Func<B,Func<C,Action<D>>>> Curry<A,B,C,D> (this Action<A,B,C,D> f) {
 		return a => b => c => d => f (a, b, c, d);
 	}
 

@@ -362,6 +362,30 @@ public static partial class Fn {
 		}
 	}
 
+	public static IEnumerable<IEnumerable<A>> SplitEvery<A> (int n, IEnumerable<A> e) {
+		var enu = e.GetEnumerator ();
+		var l = new LinkedList<A> ();
+
+		var i = 0;
+		while (enu.MoveNext()) {
+
+			l.AddLast (enu.Current);
+
+			if (++i == n) {
+				yield return l;
+				l.Clear();
+				i = 0;
+			}
+		}
+
+		if (i != 0)
+			yield return l;
+	}
+
+	public static IEnumerable<IEnumerable<A>> SplitEvery<A> (this IEnumerable<A> e, int n) {
+		return SplitEvery (n, e);
+	}
+
 	// Replicate :: int -> a -> [a]
 	public static IEnumerable<A> Replicate<A> (int n, A a) {
 		return a.Repeat ().Take (n);

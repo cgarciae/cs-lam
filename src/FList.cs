@@ -373,7 +373,7 @@ public static partial class Fn {
 
 			if (++i == n) {
 				yield return l;
-				l.Clear();
+				l = new LinkedList<A> ();
 				i = 0;
 			}
 		}

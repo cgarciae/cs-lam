@@ -132,4 +132,16 @@ public static partial class Fn {
 		return F.FMap ((Maybe<A> m) => m.FMap (f));
 	}
 
+	public static Seq<IEnumerable<B>> FMap2<A,B> (this Seq<IEnumerable<A>> F, Func<A,B> f) {
+		return F.FMap ((IEnumerable<A> m) => (IEnumerable<B>)m.FMap (f).ToList());
+	}
+
+	public static Seq<IEnumerable<A>> FMap2<A> (this Seq<IEnumerable<A>> F, Action<A> f) {
+		return F.FMap ((IEnumerable<A> m) => (IEnumerable<A>)m.FMap (f).ToList());
+	}
+
+	public static Seq<IEnumerable<A>> FMap2<A> (this Seq<IEnumerable<A>> F, Action f) {
+		return F.FMap ((IEnumerable<A> m) => (IEnumerable<A>)m.FMap (f).ToList());
+	}
+
 }

@@ -35,6 +35,10 @@ public static partial class Fn {
 		return FMap (f.ToFunc(), e);
 	}
 
+	public static IEnumerable<A> FMap<A> (this IEnumerable<A> e, Action f) {
+		return FMap (f.ToFunc<A>(), e);
+	}
+
 	//Applicative
 	//Pure :: a -> [a]
 	public static IEnumerable<A> Pure<A> (TList _, A a) {
@@ -113,6 +117,10 @@ public static partial class Fn {
 	// Map :: (a -> void) -> [a] -> [a]
 	public static List<A> Map<A> (this List<A> e, Action<A> f) {
 		return Map (f, e);
+	}
+
+	public static List<B> Map<A,B> (this IEnumerable<A> e, Func<A,B> f) {
+		return e.ToList ().Map (f);
 	}
 
 	//Filter :: (a -> bool) -> [a] -> [a]
@@ -693,10 +701,6 @@ public static partial class Fn {
 		return e => MaybeLast (e);
 	}
 
-	public static IEnumerable Then (this IEnumerable a, IEnumerable b) {
-		return Join (a, b);
-	}
-
 	public static IEnumerable<A> Enumerate<A> (Func<A> f) {
 		yield return f();
 	}
@@ -744,6 +748,46 @@ public static partial class Fn {
 		foreach (var _ in e) {
 
 		}
+	}
+
+	public static bool Any<A> (Func<A,bool> f, IEnumerable<A> e) {
+		return ! (e.Filter (f).MaybeHead ().IsNothing);
+	}
+
+	public static Func <IEnumerable<A>, bool> Any<A> (Func<A,bool> f) {
+		return e => Any (f, e);
+	}
+
+	public static Func <Func<A,bool>, Func <IEnumerable<A>, bool>> Any<A> () {
+		return f => e => Any (f, e);
+	}
+
+	public static bool Any<A> (this IEnumerable<A> e, Func<A,bool> f) {
+		return Any (f, e);
+	}
+
+	public static bool All<A> (Func<A,bool> f, IEnumerable<A> e) {
+		return ! Any (Not (f), e);
+	}
+
+	public static Func <IEnumerable<A>, bool> All<A> (Func<A,bool> f) {
+		return e => All (f, e);
+	}
+
+	public static Func<Func<A,bool>,Func <IEnumerable<A>, bool>> All<A> () {
+		return f => e => All (f, e);
+	}
+
+	public static bool All<A> (this IEnumerable<A> e, Func<A,bool> f) {
+		return All (f, e);
+	}
+
+	public static bool And (this IEnumerable<bool> e) {
+		return All (Fn.Id<bool> (), e);
+	}
+
+	public static bool Or (this IEnumerable<bool> e) {
+		return Any (Fn.Id<bool> (), e);
 	}
 
 }

@@ -282,8 +282,13 @@ public static partial class Fn {
 		return F => FMap (f, F);
 	}
 
-	public static Func<Func<bool>,Func<bool>> Not =
-		cond => () => ! cond ();
+	public static Func<bool> Not (Func<bool> cond) {
+		return () => ! cond ();
+	}
+
+	public static Func<A,bool> Not<A> (Func<A,bool> cond) {
+		return a => ! cond (a);
+	}
 
 }
 

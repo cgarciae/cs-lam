@@ -144,4 +144,12 @@ public static partial class Fn {
 		return F.FMap ((IEnumerable<A> m) => (IEnumerable<A>)m.FMap (f).ToList());
 	}
 
+	public static Seq<Maybe<A>> OnFail2<A> (this Seq<Maybe<A>> F, Action f) {
+		return F.FMap ((Maybe<A> m) => m.OnFail (f)); 
+	}
+
+	public static Seq<IEnumerable<A>> OnFail2<A> (this Seq<IEnumerable<A>> F, Action f) {
+		return F.FMap ((IEnumerable<A> m) => m.OnFail (f)); 
+	}
+
 }

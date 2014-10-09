@@ -9,6 +9,7 @@ public abstract class Maybe <A> : Monad<A> {
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
 	public abstract Maybe<A> FMap (Action<A> f);
 	public abstract Maybe<B> Bind<B> (Func<A,Maybe<B>> f);
+	public abstract Maybe<A> OnFail (Action f);
 
 	public abstract Either<B,A> ToEither<B> ();
 
@@ -92,6 +93,11 @@ public class Just<A> : Maybe<A> {
 		return Fn.MaybeRight<B, A> (val);
 	}
 
+	public override Maybe<A> OnFail (Action f)
+	{
+		return this;
+	}
+
 }
 
 public class Nothing<A> : Maybe<A> {
@@ -127,6 +133,12 @@ public class Nothing<A> : Maybe<A> {
 	public override Either<B, A> ToEither<B> ()
 	{
 		return new Neither<B, A> ();
+	}
+
+	public override Maybe<A> OnFail (Action f)
+	{
+		f ();
+		return this;
 	}
 }
 

@@ -80,6 +80,9 @@ public abstract class Either<A,B> : Monad<B> {
 		return MapR (f);
 	}
 
+	public abstract Either<A,B> OnFail (Action f);
+	public abstract Either<A,B> OnFail (Action<A> f);
+
 }
 
 public class Right<A,B> : Either<A,B> {
@@ -124,6 +127,16 @@ public class Right<A,B> : Either<A,B> {
 	public override Either<B, A> Swap ()
 	{
 		return new Left<B,A> (val);
+	}
+
+	public override Either<A, B> OnFail (Action f)
+	{
+		return this;
+	}
+
+	public override Either<A, B> OnFail (Action<A> f)
+	{
+		return this;
 	}
 
 	public override A left {
@@ -190,6 +203,18 @@ public class Left<A,B> : Either<A,B> {
 	public override Either<B, A> Swap ()
 	{
 		return new Right<B, A> (val);
+	}
+
+	public override Either<A, B> OnFail (Action f)
+	{
+		f ();
+		return this;
+	}
+	
+	public override Either<A, B> OnFail (Action<A> f)
+	{
+		f (val);
+		return this;
 	}
 
 	public override A left {
@@ -276,6 +301,17 @@ public class Neither<A,B> : Either<A,B> {
 		get {
 			return false;
 		}
+	}
+
+	public override Either<A, B> OnFail (Action f)
+	{
+		f ();
+		return this;
+	}
+	
+	public override Either<A, B> OnFail (Action<A> f)
+	{
+		return this;
 	}
 
 }

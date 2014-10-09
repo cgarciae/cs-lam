@@ -80,6 +80,21 @@ public static partial class Fn {
 	public static IEnumerable<B> Bind<A,B> (this IEnumerable<A> e, Func <A, IEnumerable<B>> f) {
 		return Bind (f, e);
 	}
+
+	public static IEnumerable<A> OnFail<A> (this IEnumerable<A> e, Action f) {
+		var enu = e.GetEnumerator ();
+
+		if (enu.MoveNext ()) {
+			f ();	
+		}
+
+		yield return enu.Current;
+
+		while (enu.MoveNext()) {
+			yield return enu.Current;	
+		}
+
+	}
 }
 
 public static partial class Fn {

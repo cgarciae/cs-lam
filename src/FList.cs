@@ -84,14 +84,15 @@ public static partial class Fn {
 	public static IEnumerable<A> OnFail<A> (this IEnumerable<A> e, Action f) {
 		var enu = e.GetEnumerator ();
 
-		if (enu.MoveNext ()) {
+		if (! enu.MoveNext ()) {
 			f ();	
 		}
+		else {
+			yield return enu.Current;
 
-		yield return enu.Current;
-
-		while (enu.MoveNext()) {
-			yield return enu.Current;	
+			while (enu.MoveNext()) {
+				yield return enu.Current;	
+			}
 		}
 
 	}

@@ -30,6 +30,11 @@ public abstract class DoIf<A> : Functor<A> {
 		throw new System.NotImplementedException ();
 	}
 
+	public Functor<A> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
+	}
+
 	public static bool operator true (DoIf<A> m) {
 		return !m.IsWaiting;
 	}

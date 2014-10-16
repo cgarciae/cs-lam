@@ -1,18 +1,19 @@
-﻿using UnityEngine;
+﻿
 using System;
 using System.Collections;
 
 public abstract class Either<A,B> : Monad<B> {
 
-	public abstract Either<A,C> BindR<C> (Func<B,Either<A,C>> f);
+	public abstract Either<A,C> Bind<C> (Func<B,Either<A,C>> f);
 	public abstract Either<C,B> BindL<C> (Func<A,Either<C,B>> f);
 
-	public abstract Either<A,C> MapR<C> (Func<B,C> f);
-	public Either<A,B> MapR (Action<B> f) {
-		return MapR (f.ToFunc ());
+	public abstract Either<A,C> FMap<C> (Func<B,C> f);
+
+	public Either<A,B> FMap (Action<B> f) {
+		return FMap (f.ToFunc ());
 	}
-	public Either<A,B> MapR (Action f) {
-		return MapR (f.ToFunc<B> ());
+	public Either<A,B> FMap (Action f) {
+		return FMap (f.ToFunc<B> ());
 	}
 
 	public abstract Either<C,B> MapL<C> (Func<A,C> f);
@@ -23,31 +24,22 @@ public abstract class Either<A,B> : Monad<B> {
 		return MapL (f.ToFunc<A> ());
 	}
 
-	public abstract Either<C,D> MapOrLeft<C,D> (C value, Func<B,D> f);
-
 	public abstract Either<B,A> Swap ();
 
 	public Either<C,D> Both<C,D> (Func<A,C> L, Func<B,D> R) {
-		return MapL (L).MapR (R);
+		return MapL (L).FMap (R);
 	}
 
 	public Either<C,B> Both<C> (Func<A,C> L, Action<B> R) {
-		return MapL (L).MapR (R);
+		return MapL (L).FMap (R);
 	}
 
 	public Either<A,D> Both<D> (Action<A> L, Func<B,D> R) {
-		return MapL (L).MapR (R);
+		return MapL (L).FMap (R);
 	}
 
 	public Either<A,B> Both (Action<A> L, Action<B> R) {
-		return MapL (L).MapR (R);
-	}
-
-	public Either<A,C> FMap<C> (Func<B,C> f) {
-		return MapR (f);
-	}
-	public Either<A,B> FMap (Action<B> f) {
-		return MapR (f);
+		return MapL (L).FMap (R);
 	}
 
 	public Either<A,B> Pure (B value) {
@@ -77,11 +69,16 @@ public abstract class Either<A,B> : Monad<B> {
 
 	Functor<C> Functor<B>.FMap<C> (Func<B, C> f)
 	{
-		return MapR (f);
+		return FMap (f);
 	}
 
-	public abstract Either<A,B> OnFail (Action f);
-	public abstract Either<A,B> OnFail (Action<A> f);
+	public Functor<B> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
+	}
+
+	public abstract Either<A,B> IfFailed (Action f);
+	public abstract Either<A,B> IfFailed (Action<A> f);
 
 }
 
@@ -93,7 +90,7 @@ public class Right<A,B> : Either<A,B> {
 		this.val = value;
 	}
 
-	public override Either<A, C> BindR<C> (Func<B, Either<A, C>> f)
+	public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
 	{
 		return f (val);
 	}
@@ -103,7 +100,7 @@ public class Right<A,B> : Either<A,B> {
 		return new Right<C, B> (val);
 	}
 
-	public override Either<A, C> MapR<C> (Func<B, C> f)
+	public override Either<A, C> FMap<C> (Func<B, C> f)
 	{
 		return Fn.MaybeRight<A,C> (f (right));
 	}
@@ -113,28 +110,17 @@ public class Right<A,B> : Either<A,B> {
 		return new Right<C, B> (val);
 	}
 
-	public override Either<C, D> MapOrLeft<C, D> (C value, Func<B, D> f)
-	{
-		try {
-			return Fn.Either (value, f (val));
-		}
-		catch {
-			Debug.Log ("Left: " + val.ToString());
-			return Fn.MaybeLeft<C,D> (value);
-		}
-	}
-
 	public override Either<B, A> Swap ()
 	{
 		return new Left<B,A> (val);
 	}
 
-	public override Either<A, B> OnFail (Action f)
+	public override Either<A, B> IfFailed (Action f)
 	{
 		return this;
 	}
 
-	public override Either<A, B> OnFail (Action<A> f)
+	public override Either<A, B> IfFailed (Action<A> f)
 	{
 		return this;
 	}
@@ -172,9 +158,8 @@ public class Left<A,B> : Either<A,B> {
 		val = value;
 	}
 
-	public override Either<A, C> BindR<C> (Func<B, Either<A, C>> f)
-	{
-		Debug.Log ("Left: " + val.ToString());
+	public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
+	{;
 		return new Left<A,C> (val);
 	}
 
@@ -183,9 +168,8 @@ public class Left<A,B> : Either<A,B> {
 		return f (val);
 	}
 
-	public override Either<A, C> MapR<C> (Func<B, C> f)
+	public override Either<A, C> FMap<C> (Func<B, C> f)
 	{
-		Debug.Log ("Left: " + val.ToString());
 		return new Left<A,C> (val);
 	}
 
@@ -194,24 +178,18 @@ public class Left<A,B> : Either<A,B> {
 		return Fn.MaybeLeft<C,B> (f (val));
 	}
 
-	public override Either<C, D> MapOrLeft<C, D> (C value, Func<B, D> f)
-	{
-		Debug.Log ("Left: " + value.ToString());
-		return Fn.MaybeLeft<C,D> (value);
-	}
-
 	public override Either<B, A> Swap ()
 	{
 		return new Right<B, A> (val);
 	}
 
-	public override Either<A, B> OnFail (Action f)
+	public override Either<A, B> IfFailed (Action f)
 	{
 		f ();
 		return this;
 	}
 	
-	public override Either<A, B> OnFail (Action<A> f)
+	public override Either<A, B> IfFailed (Action<A> f)
 	{
 		f (val);
 		return this;
@@ -246,7 +224,7 @@ public class Neither<A,B> : Either<A,B> {
 
 	public Neither() {}
 
-	public override Either<A, C> BindR<C> (Func<B, Either<A, C>> f)
+	public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
 	{
 		return new Neither<A,C> ();
 	}
@@ -256,22 +234,14 @@ public class Neither<A,B> : Either<A,B> {
 		return new Neither<C, B> ();
 	}
 
-	public override Either<A, C> MapR<C> (Func<B, C> f)
+	public override Either<A, C> FMap<C> (Func<B, C> f)
 	{
-		Debug.Log ("Nothing happened");
 		return new Neither<A,C> ();
 	}
 
 	public override Either<C, B> MapL<C> (Func<A, C> f)
 	{
-		Debug.Log ("Nothing happened");
 		return new Neither<C, B> ();
-	}
-
-	public override Either<C, D> MapOrLeft<C, D> (C value, Func<B, D> f)
-	{
-		Debug.Log ("Left: " + value.ToString());
-		return Fn.MaybeLeft<C,D> (value);
 	}
 
 	public override Either<B, A> Swap ()
@@ -303,13 +273,13 @@ public class Neither<A,B> : Either<A,B> {
 		}
 	}
 
-	public override Either<A, B> OnFail (Action f)
+	public override Either<A, B> IfFailed (Action f)
 	{
 		f ();
 		return this;
 	}
 	
-	public override Either<A, B> OnFail (Action<A> f)
+	public override Either<A, B> IfFailed (Action<A> f)
 	{
 		return this;
 	}
@@ -317,6 +287,14 @@ public class Neither<A,B> : Either<A,B> {
 }
 
 public static partial class Fn {
+
+	public static Either<A,B> Right<A,B> (B right) {
+		return new Right<A, B> (right);
+	}
+
+	public static Either<A,B> Left<A,B> (A left) {
+		return new Left<A, B> (left);
+	}
 
 	public static Either<A,B> Either<A,B> (A left, B right) {
 
@@ -328,11 +306,9 @@ public static partial class Fn {
 			return new Right<A,B> (right);
 		
 		else if (condL) {
-			Debug.Log ("Left: " + left.ToString());
 			return new Left<A,B> (left);
 		}
 		else {
-			Debug.Log ("Neither");
 			return new Neither<A,B> ();
 		}
 	}
@@ -346,51 +322,11 @@ public static partial class Fn {
 			return new Right<A,string> (right);
 
 		else if (condL) {
-			Debug.Log ("Left: " + left.ToString());
 			return new Left<A,string> (left);
 		}
 
-		else{
-			Debug.Log ("Neither");
+		else {
 			return new Neither<A,string> ();
-		}
-	}
-
-	public static Either<string,B> Either<B> (string left, B right) {
-
-		var condR = right != null;
-		var condL = left != null && left != "";
-
-		if (condR)
-			return new Right<string, B> (right);
-		
-		else if (condL) {
-			Debug.Log ("Left: " + left.ToString());
-			return new Left<string, B> (left);
-		}
-		
-		else{
-			Debug.Log ("Neither");
-			return new Neither<string, B> ();
-		}
-	}
-
-	public static Either<string,string> Either (string left, string right) {
-
-		var condR = right != null && right != "";
-		var condL = left != null && left != "";
-		
-		if (condR)
-			return new Right<string,string> (right);
-		
-		else if (condL) {
-			Debug.Log ("Left: " + left.ToString());
-			return new Left<string,string> (left);
-		}
-		
-		else{
-			Debug.Log ("Neither");
-			return new Neither<string,string> ();
 		}
 	}
 
@@ -400,7 +336,6 @@ public static partial class Fn {
 			return new Right<A,B> (value);
 		
 		else {
-			Debug.Log ("Right Failed");
 			return new Neither<A, B> ();
 		}
 	}
@@ -411,7 +346,6 @@ public static partial class Fn {
 			return new Left<A,B> (value);
 		
 		else {
-			Debug.Log ("Failed Left");
 			return new Neither<A, B> ();
 		}
 	}

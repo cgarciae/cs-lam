@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿
 using System;
 using System.Linq;
 using System.Collections;
@@ -81,7 +81,7 @@ public static partial class Fn {
 		return Bind (f, e);
 	}
 
-	public static IEnumerable<A> OnFail<A> (this IEnumerable<A> e, Action f) {
+	public static IEnumerable<A> IfFailed<A> (this IEnumerable<A> e, Action f) {
 		var enu = e.GetEnumerator ();
 
 		if (! enu.MoveNext ()) {
@@ -137,6 +137,10 @@ public static partial class Fn {
 
 	public static List<B> Map<A,B> (this IEnumerable<A> e, Func<A,B> f) {
 		return e.ToList ().Map (f);
+	}
+
+	public static List<A> Map<A> (this IEnumerable<A> e, Action<A> f) {
+		return e.ToList ().Map (f.ToFunc());
 	}
 
 	//Filter :: (a -> bool) -> [a] -> [a]
@@ -521,7 +525,7 @@ public static partial class Fn {
 	public static IEnumerable Cycle (this IEnumerable e){
 		while (true)
 			foreach(var _ in e) 
-				yield return null;
+				yield return _;
 	}
 
 	//Join :: [a] -> [a] -> [a]
@@ -549,11 +553,11 @@ public static partial class Fn {
 	//Join :: [a] -> [a] -> [a]
 	public static IEnumerable Join (this IEnumerable a, IEnumerable b) {
 		var enuA = a.GetEnumerator ();
-		var enuB = b.GetEnumerator ();
 		
 		while (enuA.MoveNext())
 			yield return enuA.Current;
-		
+
+		var enuB = b.GetEnumerator ();
 		while (enuB.MoveNext())
 			yield return enuB.Current;
 	}
@@ -566,6 +570,64 @@ public static partial class Fn {
 	//Join :: [a] -> [a] -> [a]
 	public static Func<IEnumerable,Func<IEnumerable,IEnumerable>> Join () {
 		return a => b => Join (a, b);
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable<A> Join<A> (this IEnumerable<A> a, Func<IEnumerable<A>> b) {
+
+		var enuA = a.GetEnumerator ();
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+
+		var enuB = b().GetEnumerator ();
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable Join<A> (this IEnumerable a, Func<IEnumerable<A>> b) {
+		
+		var enuA = a.GetEnumerator ();
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+		
+		var enuB = b().GetEnumerator ();
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable Join (this IEnumerable a, Func<IEnumerable> b) {
+		
+		var enuA = a.GetEnumerator ();
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+		
+		var enuB = b().GetEnumerator ();
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable Join<A> (this IEnumerable a, Func<Seq<A>> b) {
+		
+		var enuA = a.GetEnumerator ();
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+		
+		var enuB = b().GetEnumerator ();
+		while (enuB.MoveNext())
+			yield return enuB.Current;
+	}
+
+	//Join :: [a] -> [a] -> [a]
+	public static IEnumerable Join<A> (this IEnumerable a, Func<A> b) {
+		
+		var enuA = a.GetEnumerator ();
+		while (enuA.MoveNext())
+			yield return enuA.Current;
+		
+		yield return b ();
 	}
 
 	//Concat :: [[a]] -> [a]
@@ -746,7 +808,6 @@ public static partial class Fn {
 		}
 	}
 
-
 	public static IEnumerable Enumerate (Action f) {
 		f ();
 		yield return null;
@@ -755,6 +816,7 @@ public static partial class Fn {
 	public static IEnumerable<A> Enumerate<A> (A a) {
 		yield return a;
 	}
+
 
 	public static Func<Action,IEnumerable> Enumerate () {
 		return f => Enumerate (f);

@@ -20,6 +20,11 @@ public class Tuple<A,B> : Functor<B> {
 	{
 		return new Tuple<A,C> (fst, f (snd));
 	}
+
+	public Functor<B> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
+	}
 }
 
 public class Tuple<A,B,C> : Functor<C> {
@@ -41,6 +46,11 @@ public class Tuple<A,B,C> : Functor<C> {
 	Functor<D> Functor<C>.FMap<D> (Func<C,D> f)
 	{
 		return new Tuple<A,B,D> (fst, snd, f (third));
+	}
+
+	public Functor<C> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
 	}
 }
 
@@ -65,6 +75,11 @@ public class Tuple<A,B,C,D> : Functor<D> {
 	Functor<E> Functor<D>.FMap<E> (Func<D,E> f)
 	{
 		return new Tuple<A,B,C,E> (fst, snd, third, f (forth));
+	}
+
+	public Functor<D> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
 	}
 }
 

@@ -20,6 +20,11 @@ public abstract class Promise<A,B> : Functor<B> {
 		return FMap (f);
 	}
 
+	public Functor<B> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
+	}
+
 	public abstract bool isBroken { get;}
 	public abstract bool isPending { get;}
 	public abstract bool isResolved { get;}

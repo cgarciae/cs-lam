@@ -1,4 +1,4 @@
-using UnityEngine;
+
 using System;
 using System.Collections;
 
@@ -8,8 +8,10 @@ public abstract class Maybe <A> : Monad<A> {
 	public abstract A value {get;}
 	public abstract Maybe<B> FMap<B> (Func<A,B> f);
 	public abstract Maybe<A> FMap (Action<A> f);
+	public virtual Maybe<A> XMap (Func<Exception,Exception> f) {return this;}
+	public virtual Maybe<A> XMap (Action<Exception> f) {return this;}
+	public virtual Maybe<A> XMap (Action f) {return XMap (f.ToAction<Exception> ());}
 	public abstract Maybe<B> Bind<B> (Func<A,Maybe<B>> f);
-	public abstract Maybe<A> OnFail (Action f);
 
 	public abstract Either<B,A> ToEither<B> ();
 
@@ -24,6 +26,11 @@ public abstract class Maybe <A> : Monad<A> {
 	Functor<B> Functor<A>.FMap<B> (Func<A, B> f)
 	{
 		return FMap (f);
+	}
+
+	Functor<A> Functor<A>.XMap (Func<Exception, Exception> fx)
+	{
+		return XMap (fx);
 	}
 
 	Functor<A> Applicative<A>.Pure (A a)
@@ -50,6 +57,12 @@ public abstract class Maybe <A> : Monad<A> {
 		else
 			return f (value);
 	}
+
+	public virtual Exception exception {
+		get {
+			return default (Exception);
+		}
+	}
 }
 
 public class Just<A> : Maybe<A> {
@@ -69,6 +82,16 @@ public class Just<A> : Maybe<A> {
 	{
 		f (val);
 		return this;
+	}
+
+	public override Maybe<A> XMap (Func<Exception, Exception> f)
+	{
+		return this;
+	}
+
+	public override Maybe<A> XMap (Action<Exception> f)
+	{
+		throw new NotImplementedException ();
 	}
 	
 	public override bool IsNothing {
@@ -91,11 +114,6 @@ public class Just<A> : Maybe<A> {
 	public override Either<B, A> ToEither<B> ()
 	{
 		return Fn.MaybeRight<B, A> (val);
-	}
-
-	public override Maybe<A> OnFail (Action f)
-	{
-		return this;
 	}
 
 }
@@ -134,12 +152,6 @@ public class Nothing<A> : Maybe<A> {
 	{
 		return new Neither<B, A> ();
 	}
-
-	public override Maybe<A> OnFail (Action f)
-	{
-		f ();
-		return this;
-	}
 }
 
 public class TMaybe {
@@ -153,9 +165,26 @@ public class TMaybe {
 	private TMaybe (){}
 }
 
+public class MaybeFailed : Exception
+{
+	public MaybeFailed()
+	{
+	}
+	
+	public MaybeFailed(string message)
+		: base(message)
+	{
+	}
+	
+	public MaybeFailed(string message, Exception inner)
+		: base(message, inner)
+	{
+	}
+}
+
 
 public static partial class Fn {
-
+	
 	public static Maybe<A> Just<A> (A a) {
 		return new Just<A> (a);
 	}

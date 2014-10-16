@@ -13,10 +13,18 @@ public static partial class Fn {
 	}
 
 	public static Action DoNothing = () => {};
-	public static IEnumerable EnumerateNothing = Enumerate (DoNothing);
+	public static Func<IEnumerable> EnumerateNothingFunc = EnumerateZero;
 	public static Action<A> NoAction<A> () {return a => {};}
 	public static Func<bool> False = () => false;
 	public static Func<bool> True = () => true;
+
+	public static IEnumerable EnumerateZero () {
+		yield break;
+	}
+
+	public static IEnumerable EnumerateOne () {
+		yield return null;
+	}
 
 	//ToFunc :: (a -> void) -> (a -> a)
 	public static Func<A, A> ToFunc<A>(this Action<A> act)
@@ -221,6 +229,10 @@ public static partial class Fn {
 		return (f) .Of (g);
 	}
 
+	public static Func<B> o<A,B> (this Func<A,B> f, Func<A> g) {
+		return () => f (g ());
+	}
+
 	//Curry :: (a -> b -> c) -> (a -> (b -> c))
 	public static Func<A,Func<B,C>> Curry<A,B,C> (this Func<A,B,C> f) {
 		return a => b => f (a, b);
@@ -295,6 +307,7 @@ public static partial class Fn {
 //Interfaces
 public interface Functor<A> {
 	Functor<B> FMap<B> (Func<A,B> f);
+	Functor<A> XMap (Func<Exception, Exception> f);
 }
 
 public interface Applicative<A> : Functor<A> {

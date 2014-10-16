@@ -37,6 +37,11 @@ public class Lazy<A> : Applicative<A> {
 	{
 		return FMap<B> (f);
 	}
+
+	public Functor<A> XMap (Func<Exception, Exception> fx)
+	{
+		throw new NotImplementedException ();
+	}
 }
 
 public static partial class Fn {

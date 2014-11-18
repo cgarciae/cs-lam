@@ -6,16 +6,16 @@ namespace Tatacoa
 {
 	public abstract class Either<A,B> : Monad<B> {
 
-		public abstract Either<A,C> Then<C> (Func<B,Either<A,C>> f);
+		public abstract Either<A,C> Bind<C> (Func<B,Either<A,C>> f);
 		public abstract Either<C,B> BindL<C> (Func<A,Either<C,B>> f);
 
-		public abstract Either<A,C> Then<C> (Func<B,C> f);
+		public abstract Either<A,C> FMap<C> (Func<B,C> f);
 
-		public Either<A,B> Then (Action<B> f) {
-			return Then (f.ToFunc ());
+		public Either<A,B> FMap (Action<B> f) {
+			return FMap (f.ToFunc ());
 		}
-		public Either<A,B> Then (Action f) {
-			return Then (f.ToFunc<B> ());
+		public Either<A,B> FMap (Action f) {
+			return FMap (f.ToFunc<B> ());
 		}
 
 		public abstract Either<C,B> MapL<C> (Func<A,C> f);
@@ -29,19 +29,19 @@ namespace Tatacoa
 		public abstract Either<B,A> Swap ();
 
 		public Either<C,D> Both<C,D> (Func<A,C> L, Func<B,D> R) {
-			return MapL (L).Then (R);
+			return MapL (L).FMap (R);
 		}
 
 		public Either<C,B> Both<C> (Func<A,C> L, Action<B> R) {
-			return MapL (L).Then (R);
+			return MapL (L).FMap (R);
 		}
 
 		public Either<A,D> Both<D> (Action<A> L, Func<B,D> R) {
-			return MapL (L).Then (R);
+			return MapL (L).FMap (R);
 		}
 
 		public Either<A,B> Both (Action<A> L, Action<B> R) {
-			return MapL (L).Then (R);
+			return MapL (L).FMap (R);
 		}
 
 		public Either<A,B> Pure (B value) {
@@ -71,7 +71,7 @@ namespace Tatacoa
 
 		Functor<C> Functor<B>.FMap<C> (Func<B, C> f)
 		{
-			return Then (f);
+			return FMap (f);
 		}
 
 		public Functor<B> XMap (Func<Exception, Exception> fx)
@@ -92,7 +92,7 @@ namespace Tatacoa
 			this.val = value;
 		}
 
-		public override Either<A, C> Then<C> (Func<B, Either<A, C>> f)
+		public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
 		{
 			return f (val);
 		}
@@ -102,7 +102,7 @@ namespace Tatacoa
 			return new Right<C, B> (val);
 		}
 
-		public override Either<A, C> Then<C> (Func<B, C> f)
+		public override Either<A, C> FMap<C> (Func<B, C> f)
 		{
 			return Fn.MaybeRight<A,C> (f (right));
 		}
@@ -160,7 +160,7 @@ namespace Tatacoa
 			val = value;
 		}
 
-		public override Either<A, C> Then<C> (Func<B, Either<A, C>> f)
+		public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
 		{;
 			return new Left<A,C> (val);
 		}
@@ -170,7 +170,7 @@ namespace Tatacoa
 			return f (val);
 		}
 
-		public override Either<A, C> Then<C> (Func<B, C> f)
+		public override Either<A, C> FMap<C> (Func<B, C> f)
 		{
 			return new Left<A,C> (val);
 		}
@@ -226,7 +226,7 @@ namespace Tatacoa
 
 		public Neither() {}
 
-		public override Either<A, C> Then<C> (Func<B, Either<A, C>> f)
+		public override Either<A, C> Bind<C> (Func<B, Either<A, C>> f)
 		{
 			return new Neither<A,C> ();
 		}
@@ -236,7 +236,7 @@ namespace Tatacoa
 			return new Neither<C, B> ();
 		}
 
-		public override Either<A, C> Then<C> (Func<B, C> f)
+		public override Either<A, C> FMap<C> (Func<B, C> f)
 		{
 			return new Neither<A,C> ();
 		}

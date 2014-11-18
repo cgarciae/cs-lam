@@ -15,7 +15,7 @@ namespace Tatacoa
 			val = value;
 		}
 
-		public override Either<Exception, C> Then<C> (Func<A, Either<Exception, C>> f)
+		public override Either<Exception, C> Bind<C> (Func<A, Either<Exception, C>> f)
 		{
 			try {
 				return f (val);
@@ -30,7 +30,7 @@ namespace Tatacoa
 			return new Right<C, A> (val);
 		}
 
-		public override Either<Exception, C> Then<C> (Func<A, C> f)
+		public override Either<Exception, C> FMap<C> (Func<A, C> f)
 		{
 			try {
 				return new JustRight<C> (f (val));
@@ -93,7 +93,7 @@ namespace Tatacoa
 			this.e = exception;
 		}
 
-		public override Either<Exception, C> Then<C> (Func<A, Either<Exception, C>> f)
+		public override Either<Exception, C> Bind<C> (Func<A, Either<Exception, C>> f)
 		{
 			return new Left<Exception, C> (e);
 		}
@@ -103,7 +103,7 @@ namespace Tatacoa
 			return f (e);
 		}
 
-		public override Either<Exception, C> Then<C> (Func<A, C> f)
+		public override Either<Exception, C> FMap<C> (Func<A, C> f)
 		{
 			return new Left<Exception, C> (e);
 		}

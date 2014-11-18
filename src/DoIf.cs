@@ -15,8 +15,8 @@ namespace Tatacoa
 			}
 		}
 
-		public abstract DoIf<B> Then<B> (Func<A,B> f);
-		public abstract DoIf<A> Then (Action<A> f);
+		public abstract DoIf<B> FMap<B> (Func<A,B> f);
+		public abstract DoIf<A> FMap (Action<A> f);
 		public abstract DoIf<A> Do (Func<A> f);
 		public abstract DoIf<A> Try ();
 		public abstract DoIf<A> If (Func<bool> cond);
@@ -91,12 +91,12 @@ namespace Tatacoa
 			return Try ();
 		}
 
-		public override DoIf<B> Then<B> (Func<A, B> f)
+		public override DoIf<B> FMap<B> (Func<A, B> f)
 		{
 			return new Waiting<B> (() => f (fa ()), condition, guard).Try ();
 		}
 
-		public override DoIf<A> Then (Action<A> f)
+		public override DoIf<A> FMap (Action<A> f)
 		{
 			return new Waiting<A> (() => f.ToFunc () (fa ()), condition, guard).Try();
 		}
@@ -148,14 +148,14 @@ namespace Tatacoa
 			this.guard = guard;
 		}
 
-		public override DoIf<B> Then<B> (Func<A, B> f)
+		public override DoIf<B> FMap<B> (Func<A, B> f)
 		{
-			return new Waiting<A> (() => a, condition, guard).Then (f).Try();
+			return new Waiting<A> (() => a, condition, guard).FMap (f).Try();
 		}
 
-		public override DoIf<A> Then (Action<A> f)
+		public override DoIf<A> FMap (Action<A> f)
 		{
-			return Then (f.ToFunc ());
+			return FMap (f.ToFunc ());
 		}
 
 		public override DoIf<A> Do (Func<A> f) {

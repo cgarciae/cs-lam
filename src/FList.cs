@@ -371,11 +371,6 @@ namespace Tatacoa
 		}
 
 		// TakeWhile :: (a -> bool) -> [a] -> [a]
-		public static IEnumerable<A> TakeWhile<A> (this IEnumerable<A> e, Func<A,bool> f) {
-			return TakeWhile (f, e);
-		}
-
-		// TakeWhile :: (a -> bool) -> [a] -> [a]
 		public static IEnumerable<A> TakeWhile<A> (Func<A,bool> f, IEnumerator<A> enu) {
 			
 			while (enu.MoveNext() && f (enu.Current)) {
@@ -721,9 +716,7 @@ namespace Tatacoa
 
 		//Head :: [a] -> a
 		public static A Head<A> (this IEnumerable<A> e) {
-			var enu = e.GetEnumerator ();
-			enu.MoveNext ();
-			return enu.Current;
+			return e.First ();
 		}
 
 		//Head :: [a] -> a
@@ -745,19 +738,6 @@ namespace Tatacoa
 		public static Func <IEnumerable<A>, Maybe<A>> MaybeHead<A> () {
 			return e => MaybeHead (e);
 		}
-
-		//LAST
-		//Last :: [a] -> a
-		public static A Last<A> (this IEnumerable<A> e) {
-			var enu = e.GetEnumerator ();
-			A last = default (A);
-
-			while (enu.MoveNext ()) {
-				last = enu.Current;
-			}
-
-			return last;
-		}
 		
 		//Last :: [a] -> a
 		public static Func <IEnumerable<A>, A> Last<A> () {
@@ -768,10 +748,10 @@ namespace Tatacoa
 		public static Maybe<A> MaybeLast<A> (this IEnumerable<A> e) {
 			var enu = e.GetEnumerator ();
 			
-			if (enu.MoveNext ()) {
-				while (enu.MoveNext ()) {
+			if (enu.MoveNext ()) 
+			{
+				while (enu.MoveNext ()) {}
 
-				}
 				return Fn.Maybe (enu.Current);
 			}
 			else

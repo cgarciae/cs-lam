@@ -1,6 +1,7 @@
-
+using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Tatacoa
 {
@@ -252,12 +253,12 @@ namespace Tatacoa
 
 		//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
 		public static Maybe<B> Apply<A,B> (this Maybe<Func<A,B>> mf, Maybe<A> m) {
-			return mf ? new Nothing<B>() : m.FMap (mf.value);
+			return mf.IsNothing ? new Nothing<B>() : m.FMap (mf.value);
 		}
 
 		//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
 		public static Maybe<A> Apply<A> (this Maybe<Action<A>> mf, Maybe<A> m) {
-			return mf ? new Nothing<A>() : m.FMap (mf.value);
+			return mf.IsNothing ? new Nothing<A>() : m.FMap (mf.value);
 		}
 
 		//Apply :: Maybe (a -> b) -> Maybe a -> Maybe b
@@ -322,6 +323,20 @@ namespace Tatacoa
 			return s.FMap ((Maybe<Maybe<A>> m) =>  Flatten (m));
 		}
 
+		public static Maybe<IEnumerable<B>> FMap2<A,B> (this Maybe<IEnumerable<A>> m, Func<A,B> f)
+		{
+			return m.FMap ((IEnumerable<A> e) => e.FMap(f));
+		}
+
+		public static Maybe<List<B>> Map2<A,B> (this Maybe<IEnumerable<A>> m, Func<A,B> f)
+		{
+			return m.FMap ((IEnumerable<A> e) => e.Map(f));
+		}
+
+		public static Maybe<List<A>> Map2<A> (this Maybe<IEnumerable<A>> m, Action<A> f)
+		{
+			return m.Map2 (f.ToFunc());
+		}
 
 	}
 }

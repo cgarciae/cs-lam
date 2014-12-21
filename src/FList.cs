@@ -850,6 +850,12 @@ namespace Tatacoa
 			return Any (Fn.Id<bool> (), e);
 		}
 
+		//Shortcuts
+		public static float Sum (float a, float b)
+		{
+			return a + b;
+		}
+
 	}
 
 	public class TList {
